@@ -4,5 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
+    "mypy>=2.3.1",
     "pytest>=8.4.2",
 ]
+
+[tool.mypy]
+explicit_package_bases = true
+mypy_path = "src"
+namespace_packages = true

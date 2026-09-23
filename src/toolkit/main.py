@@ -1,6 +1,6 @@
 import argparse
-from toolkit import calculator
-from toolkit import converter
+
+from toolkit import calculator, converter
 
 
 def main() -> None:
@@ -22,8 +22,8 @@ def main() -> None:
     # converter
     convert_parser = subparsers.add_parser("convert")
     convert_parser.add_argument("value", default="", nargs="?")
-    convert_parser.add_argument("--from")
-    convert_parser.add_argument("--to")
+    convert_parser.add_argument("--from", dest="flag_from")
+    convert_parser.add_argument("--to", dest="flag_to")
     convert_parser.set_defaults(func=converter.convert, command="converter")
 
     # Parse arguments and select func

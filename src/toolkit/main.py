@@ -1,6 +1,31 @@
+import argparse
+from toolkit import calculator
+from toolkit import converter
+
+
 def main() -> None:
     """
     Обязательнная составляющая программ, которые сдаются. Является точкой входа в приложение
     :return: Данная функция ничего не возвращает
     """
-    ...
+    parser = argparse.ArgumentParser(
+        prog="toolkit",
+        description="CLI app for calculation and converter",
+    )
+    subparsers = parser.add_subparsers(required=True)
+
+    # calculate
+    calc_parser = subparsers.add_parser("calc")
+    calc_parser.add_argument("expression", default="", nargs="?")
+    calc_parser.set_defaults(func=calculator.calculate, command="calc")
+
+    # converter
+    convert_parser = subparsers.add_parser("convert")
+    convert_parser.add_argument("value", default="", nargs="?")
+    convert_parser.add_argument("--from")
+    convert_parser.add_argument("--to")
+    convert_parser.set_defaults(func=converter.convert, command="converter")
+
+    # Parse arguments and select func
+    args = parser.parse_args()
+    args.func(args)

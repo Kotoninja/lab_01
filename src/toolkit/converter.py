@@ -2,8 +2,10 @@ import argparse
 import sys
 
 from toolkit import errors
+from toolkit.constans import LENGTH_ENUM, TEMPERATURE_ENUM, WEIGHT_ENUM
 
 
+# ANCHOR[id=validate]
 def validate(args: argparse.Namespace):
     value: str = args.value
     if not len(value.rstrip()):
@@ -18,11 +20,11 @@ def validate(args: argparse.Namespace):
         raise errors.ToNone
 
     def different_cotegory():
-        if flag_from in ["mm", "cm", "m", "km"] and flag_to in ["mm", "cm", "m", "km"]:
+        if flag_from in LENGTH_ENUM and flag_to in LENGTH_ENUM:
             return
-        if flag_from in ["g", "km"] and flag_to in ["g", "km"]:
+        if flag_from in TEMPERATURE_ENUM and flag_to in TEMPERATURE_ENUM:
             return
-        if flag_from in ["c", "f", "k"] and flag_to in ["c", "f", "k"]:
+        if flag_from in WEIGHT_ENUM and flag_to in WEIGHT_ENUM:
             return
         raise errors.DifferentConverterCategory
 

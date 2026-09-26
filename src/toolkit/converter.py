@@ -38,7 +38,7 @@ def convert(args: argparse.Namespace):
     try:
         validate(args=args)
     except errors.ZeroLength:
-        sys.stdout.write("Please specify value\n")
+        sys.stdout.write(errors.ZeroLength.text.format("Value") + "\n")
         return
     except (errors.FromNone, errors.ToNone, errors.DifferentConverterCategory) as e:
         sys.stdout.write(f"{e.text}\n")

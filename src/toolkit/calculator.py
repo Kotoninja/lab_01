@@ -26,7 +26,11 @@ def calculate(args: argparse.Namespace):
             result: float = execute_expression(postfix_list=postfix_convertation)
             sys.stdout.write(f"{result}\n")
             return
-        except (errors.ValidationExpression, errors.UnknownOperation) as e:
+        except (
+            errors.ValidationExpression,
+            errors.UnknownOperation,
+            errors.DivisionByZero,
+        ) as e:
             sys.stdout.write(e.text + "\n")
             return
 
@@ -118,11 +122,14 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
         case "*":
             return op1 * op2
         case "/":
+            if op2 == 0:
+                raise errors.DivisionByZero
             return op1 / op2
         case _:
             raise errors.UnknownOperation
 
 
+# ANCHOR[id=execute_expression]
 def execute_expression(postfix_list: list[str]) -> float:
     stack: list[str] = []
 
@@ -148,10 +155,7 @@ def execute_expression(postfix_list: list[str]) -> float:
         except ValueError:
             raise errors.ValidationExpression
 
-        try:
-            stack.append(str(use_operation(second, first, symbol)))
-        except errors.ValidationExpression:
-            raise errors.ValidationExpression
+        stack.append(str(use_operation(second, first, symbol)))
 
     if len(stack) != 1:
         raise errors.ValidationExpression

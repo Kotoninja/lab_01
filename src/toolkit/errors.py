@@ -1,3 +1,7 @@
+def color(value: str) -> str:
+    return f"\033[31mError: {value}\033[0m"
+
+
 class ZeroLength(BaseException):
     text = "{} has zero length"
 
@@ -14,13 +18,13 @@ class DifferentConverterCategory(BaseException):
     text = "Different converter category"
 
 
-# class ConvertToPostfix(BaseException):
-#     text = "The expression could not be converted to postfix form. Please ensure it is written correctly and does not contain any syntax errors."
-
-
 class ValidationExpression(BaseException):
-    text = "\033[31mError: Invalid mathematical expression syntax.\033[0m"
+    text = color(value="Invalid mathematical expression syntax.")
 
 
 class UnknownOperation(BaseException):
-    text = "Error: Unknown operation"
+    text = color(value="Unknown operation.")
+
+
+class DivisionByZero(BaseException):
+    text = color(value="Division by zero.")

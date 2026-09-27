@@ -47,9 +47,9 @@ def tokenization(expression: str) -> list[str]:
     buffer: str = ""
     for i in range(len(expression)):
         symbol: str = expression[i]
-        if (symbol.isdigit() or symbol == ".") or (
+        if (isnumber(symbol) or symbol == ".") or (
             symbol in "+-"
-            and (not expression[i - 1].isdigit() and expression[i + 1].isdigit())
+            and (not isnumber(expression[i - 1]) and isnumber(expression[i + 1]))
         ):
             buffer += symbol
         else:
@@ -78,7 +78,7 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
     stack: list[str] = []
 
     for symbol in infix_list:
-        if symbol.isdigit():
+        if isnumber(symbol):
             postfix_list.append(symbol)
         elif symbol == ")":
             while len(stack):
@@ -95,6 +95,18 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
         postfix_list.append(stack.pop())
 
     return postfix_list
+
+
+# ANCHOR[id=isnumber]
+def isnumber(value: str) -> bool:
+    if value.isdigit():
+        return True
+
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
 
 
 def use_operation(op1: float, op2: float, operation: str) -> float:
@@ -121,7 +133,7 @@ def execute_expression(postfix_list: list[str]) -> float:
 
         if not is_operation:
             value: str = postfix_list[i]
-            if value.isdigit():
+            if isnumber(symbol):
                 stack.append(value)
             else:
                 raise errors.ValidationExpression

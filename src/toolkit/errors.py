@@ -19,8 +19,8 @@ class DifferentConverterCategory(BaseException):
 
 
 class ValidationExpression(BaseException):
-    text = "The number of opening and closing parentheses does not match."
+    text = "\033[31mError: Invalid mathematical expression syntax.\033[0m"
 
 
 class UnknownOperation(BaseException):
-    text = "Unknown operation"
+    text = "Error: Unknown operation"

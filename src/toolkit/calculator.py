@@ -23,6 +23,14 @@ def calculate(args: argparse.Namespace):
 
 
 def tokenization(expression: str) -> list[str]:
+    """tokenize input, e.g. expression="11+1" return: ["11", "+", "1"]
+
+    Args:
+        expression (str): user input
+
+    Returns:
+        list[str]: tokenized input
+    """
     expression = " " + expression.rstrip()
     result: list[str] = []
 

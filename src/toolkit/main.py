@@ -31,6 +31,7 @@ def main() -> None:
     :return: Данная функция ничего не возвращает
     """
     parser = create_parser()
+
     # Parse arguments and select func
     args = parser.parse_args()
     args.func(args)

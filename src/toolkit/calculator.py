@@ -19,7 +19,16 @@ def calculate(args: argparse.Namespace):
         sys.stdout.write(e.text.format("Expression") + "\n")
         return
     else:
-        print(convert_infix_to_postfix(tokenization(args.expression)))
+        tokens: list[str] = tokenization(args.expression)
+        postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
+
+        try:
+            result: float = execute_expression(postfix_list=postfix_convertation)
+            sys.stdout.write(f"{result}\n")
+            return
+        except (errors.ValidationExpression, errors.UnknownOperation) as e:
+            sys.stdout.write(e.text + "\n")
+            return
 
 
 def tokenization(expression: str) -> list[str]:
@@ -83,3 +92,52 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
         postfix_list.append(stack.pop())
 
     return postfix_list
+
+
+def use_operation(op1: float, op2: float, operation: str) -> float:
+    match operation:
+        case "+":
+            return op1 + op2
+        case "-":
+            return op1 - op2
+        case "*":
+            return op1 * op2
+        case "/":
+            return op1 / op2
+        case _:
+            raise errors.UnknownOperation
+
+
+def execute_expression(postfix_list: list[str]) -> float:
+    stack: list[str] = []
+
+    for i in range(len(postfix_list)):
+        symbol: str = postfix_list[i]
+
+        is_operation: bool = symbol in "+-*/"
+
+        if not is_operation:
+            value: str = postfix_list[i]
+            if value.isdigit():
+                stack.append(value)
+            else:
+                raise errors.ValidationExpression
+            continue
+
+        if is_operation and len(stack) < 2:
+            raise errors.ValidationExpression
+
+        try:
+            first: float = float(stack.pop())
+            second: float = float(stack.pop())
+        except ValueError:
+            raise errors.ValidationExpression
+
+        try:
+            stack.append(str(use_operation(second, first, symbol)))
+        except errors.ValidationExpression:
+            raise errors.ValidationExpression
+
+    if len(stack) != 1:
+        raise errors.ValidationExpression
+    return float(stack.pop())

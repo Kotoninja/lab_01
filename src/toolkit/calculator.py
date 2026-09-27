@@ -20,9 +20,9 @@ def calculate(args: argparse.Namespace):
         return
     else:
         tokens: list[str] = tokenization(args.expression)
-        postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
 
         try:
+            postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
             result: float = execute_expression(postfix_list=postfix_convertation)
             sys.stdout.write(f"{result}\n")
             return
@@ -31,6 +31,7 @@ def calculate(args: argparse.Namespace):
             return
 
 
+# ANCHOR[id=tokenization]
 def tokenization(expression: str) -> list[str]:
     """tokenize input, e.g. expression="11+1" return: ["11", "+", "1"]
 
@@ -40,7 +41,7 @@ def tokenization(expression: str) -> list[str]:
     Returns:
         list[str]: tokenized input
     """
-    expression = " " + expression.rstrip()
+    expression = expression.rstrip() + " "
     result: list[str] = []
 
     buffer: str = ""
@@ -64,10 +65,13 @@ def tokenization(expression: str) -> list[str]:
 
 
 def higher_or_equal(op1, op2):
-    precedence = {"+": 1, "-": 1, "*": 2, "/": 2}
+    precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "(": 0}
+    if (op1 not in precedence) or (op2 not in precedence):
+        raise errors.ValidationExpression
     return precedence[op1] >= precedence[op2]
 
 
+# ANCHOR[id=convert_infix_to_postfix]
 def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
     postfix_list: list[str] = []
 
@@ -83,10 +87,9 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
                     postfix_list.append(stack_element)
                 else:
                     break
-        elif symbol != "(":
-            while len(stack):
-                if higher_or_equal(symbol, stack[-1]):
-                    postfix_list.append(stack.pop())
+        else:
+            while len(stack) and higher_or_equal(stack[-1], symbol):
+                postfix_list.append(stack.pop())
             stack.append(symbol)
     while len(stack):
         postfix_list.append(stack.pop())

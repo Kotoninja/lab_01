@@ -19,7 +19,7 @@ def calculate(args: argparse.Namespace):
         sys.stdout.write(e.text.format("Expression") + "\n")
         return
     else:
-        print(tokenization(args.expression))
+        print(convert_infix_to_postfix(tokenization(args.expression)))
 
 
 def tokenization(expression: str) -> list[str]:
@@ -52,3 +52,34 @@ def tokenization(expression: str) -> list[str]:
     if len(buffer):
         result.append(buffer)
     return result
+
+
+def higher_or_equal(op1, op2):
+    precedence = {"+": 1, "-": 1, "*": 2, "/": 2}
+    return precedence[op1] >= precedence[op2]
+
+
+def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
+    postfix_list: list[str] = []
+
+    stack: list[str] = []
+
+    for symbol in infix_list:
+        if symbol.isdigit():
+            postfix_list.append(symbol)
+        elif symbol == ")":
+            while len(stack):
+                stack_element: str = stack.pop()
+                if stack_element != "(":
+                    postfix_list.append(stack_element)
+                else:
+                    break
+        elif symbol != "(":
+            while len(stack):
+                if higher_or_equal(symbol, stack[-1]):
+                    postfix_list.append(stack.pop())
+            stack.append(symbol)
+    while len(stack):
+        postfix_list.append(stack.pop())
+
+    return postfix_list

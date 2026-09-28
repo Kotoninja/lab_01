@@ -28,3 +28,11 @@ class UnknownOperation(BaseException):
 
 class DivisionByZero(BaseException):
     text = color(value="Division by zero.")
+
+
+class ValueError(BaseException):
+    text = color(value="Value must be float")
+
+
+class TemperaturesBelowAbsoluteZero(BaseException):
+    text = color(value="Temperatures below absolute zero")

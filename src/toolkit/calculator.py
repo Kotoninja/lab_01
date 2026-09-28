@@ -11,6 +11,7 @@ def validate(args: argparse.Namespace):
         raise errors.ZeroLength
 
 
+
 # ANCHOR[id=calculate]
 def calculate(args: argparse.Namespace):
     try:

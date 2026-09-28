@@ -19,6 +19,8 @@ namespace_packages = true
 exclude_lines = [
     "def main"
 ]
+omit = ["tests/*"]
+
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

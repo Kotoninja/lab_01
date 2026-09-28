@@ -25,8 +25,9 @@ class TestConvert(unittest.TestCase):
 
     def test_convert(self):
         parsed = self.parser.parse_args(
-            ["convert", "value", "--from", "mm", "--to", "km"]
+            ["convert", "10", "--from", "mm", "--to", "km"]
         )
-        assert parsed.value == "value"
+        assert parsed.value == 10.0
+        assert type(parsed.value) is float
         assert parsed.flag_from == "mm"
         assert parsed.flag_to == "km"

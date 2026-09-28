@@ -37,12 +37,10 @@ def validate(args: argparse.Namespace):
         raise errors.DifferentConverterCategory
 
 
+# ANCHOR[id=convert]
 def convert(args: argparse.Namespace):
     try:
         validate(args=args)
-    except errors.ZeroLength:
-        sys.stdout.write(errors.ZeroLength.text.format("Value") + "\n")
-        return
     except (
         errors.FromNone,
         errors.ToNone,
@@ -50,34 +48,25 @@ def convert(args: argparse.Namespace):
         errors.TemperaturesBelowAbsoluteZero,
     ) as e:
         sys.stderr.write(f"{e.text}\n")
-        sys.exit(2)
     else:
-        value: float = args.value
+        value: float = args.value  # TODO Add Decimal
         flag_from: str = str(args.flag_from).lower()
         flag_to: str = str(args.flag_to).lower()
 
-        convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
+        result: float = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
+
+        sys.stdout.write(str(result) + "\n")
 
 
-def convert_units(value: float, flag_from: str, flag_to: str):
+def convert_units(value: float, flag_from: str, flag_to: str) -> float:
+    answer: float = 0
     if flag_from in LENGTH_ENUM:
-        sys.stdout.write(
-            str(convert_length(value=value, flag_from=flag_from, flag_to=flag_to))
-            + "\n"
-        )
+        answer = convert_length(value=value, flag_from=flag_from, flag_to=flag_to)
     elif flag_from in WEIGHT_ENUM:
-        sys.stdout.write(
-            str(convert_weight(value=value, flag_from=flag_from, flag_to=flag_to))
-            + "\n"
-        )
+        answer = convert_weight(value=value, flag_from=flag_from, flag_to=flag_to)
     elif flag_from in TEMPERATURE_ENUM:
-        sys.stdout.write(
-            str(convert_temperature(value=value, flag_from=flag_from, flag_to=flag_to))
-            + "\n"
-        )
-    else:
-        sys.exit(2)
-    sys.exit(0)
+        answer = convert_temperature(value=value, flag_from=flag_from, flag_to=flag_to)
+    return answer
 
 
 def get_units_of_measurement(value: str) -> float:

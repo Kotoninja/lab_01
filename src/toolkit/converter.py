@@ -24,6 +24,13 @@ def validate(args: argparse.Namespace):
             return
         raise errors.DifferentConverterCategory
 
+    if (
+        (flag_from == "c" and args.value <= -273)
+        or (flag_from == "k" and args.value <= 0)
+        or (flag_from == "f" and args.value <= -460)
+    ):
+        raise errors.TemperaturesBelowAbsoluteZero
+
     try:
         different_cotegory()
     except errors.DifferentConverterCategory:
@@ -36,7 +43,12 @@ def convert(args: argparse.Namespace):
     except errors.ZeroLength:
         sys.stdout.write(errors.ZeroLength.text.format("Value") + "\n")
         return
-    except (errors.FromNone, errors.ToNone, errors.DifferentConverterCategory) as e:
+    except (
+        errors.FromNone,
+        errors.ToNone,
+        errors.DifferentConverterCategory,
+        errors.TemperaturesBelowAbsoluteZero,
+    ) as e:
         sys.stderr.write(f"{e.text}\n")
         sys.exit(2)
     else:

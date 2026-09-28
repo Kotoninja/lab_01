@@ -32,3 +32,7 @@ class DivisionByZero(BaseException):
 
 class ValueError(BaseException):
     text = color(value="Value must be float")
+
+
+class TemperaturesBelowAbsoluteZero(BaseException):
+    text = color(value="Temperatures below absolute zero")

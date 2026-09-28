@@ -8,32 +8,16 @@ from toolkit import errors
 def validate(args: argparse.Namespace):
     expression: str = args.expression
     if not len(expression.rstrip()):
-        raise errors.ZeroLength
-
+        raise errors.EmptyExpressionError
 
 
 # ANCHOR[id=calculate]
 def calculate(args: argparse.Namespace):
-    try:
-        validate(args=args)
-    except errors.ZeroLength as e:
-        sys.stdout.write(e.text.format("Expression") + "\n")
-        return
-    else:
-        tokens: list[str] = tokenization(args.expression)
-
-        try:
-            postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
-            result: float = execute_expression(postfix_list=postfix_convertation)
-            sys.stdout.write(f"{result}\n")
-            return
-        except (
-            errors.ValidationExpression,
-            errors.UnknownOperation,
-            errors.DivisionByZero,
-        ) as e:
-            sys.stdout.write(e.text + "\n")
-            return
+    validate(args=args)
+    tokens: list[str] = tokenization(args.expression)
+    postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
+    result: float = execute_expression(postfix_list=postfix_convertation)
+    sys.stdout.write(f"{result}")
 
 
 # ANCHOR[id=tokenization]
@@ -51,7 +35,12 @@ def tokenization(expression: str) -> list[str]:
 
     buffer: str = ""
     for i in range(len(expression)):
-        symbol: str = expression[i]
+        symbol: str = expression[i].lower()
+
+        # print(symbol not in "/*+-% ")
+        if not symbol.isdigit() and symbol not in "/*+-%.() ":
+            raise errors.InvalidCharacterError(symbol)
+
         if (isnumber(symbol) or symbol == ".") or (
             symbol in "+-"
             and (not isnumber(expression[i - 1]) and isnumber(expression[i + 1]))
@@ -71,8 +60,10 @@ def tokenization(expression: str) -> list[str]:
 
 def higher_or_equal(op1, op2):
     precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "(": 0}
-    if (op1 not in precedence) or (op2 not in precedence):
-        raise errors.ValidationExpression
+    if op1 not in precedence:
+        raise errors.InvalidCharacterError(op1)
+    if op2 not in precedence:
+        raise errors.InvalidCharacterError(op2)
     return precedence[op1] >= precedence[op2]
 
 
@@ -127,7 +118,7 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
                 raise errors.DivisionByZero
             return op1 / op2
         case _:
-            raise errors.UnknownOperation
+            raise errors.InvalidCharacterError(operation)
 
 
 # ANCHOR[id=execute_expression]
@@ -144,20 +135,17 @@ def execute_expression(postfix_list: list[str]) -> float:
             if isnumber(symbol):
                 stack.append(value)
             else:
-                raise errors.ValidationExpression
+                raise errors.InvalidNumberError(value)
             continue
 
         if is_operation and len(stack) < 2:
-            raise errors.ValidationExpression
+            raise errors.MissingOperandError
 
-        try:
-            first: float = float(stack.pop())
-            second: float = float(stack.pop())
-        except ValueError:
-            raise errors.ValidationExpression
+        first: float = float(stack.pop())
+        second: float = float(stack.pop())
 
         stack.append(str(use_operation(second, first, symbol)))
 
     if len(stack) != 1:
-        raise errors.ValidationExpression
+        raise errors.MissingOperandError
     return float(stack.pop())

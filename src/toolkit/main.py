@@ -17,7 +17,7 @@ def create_parser():
 
     # converter
     convert_parser = subparsers.add_parser("convert")
-    convert_parser.add_argument("value", default="", nargs="?")
+    convert_parser.add_argument("value", default="", nargs="?", type=float)
     convert_parser.add_argument("--from", dest="flag_from")
     convert_parser.add_argument("--to", dest="flag_to")
     convert_parser.set_defaults(func=converter.convert, command="converter")

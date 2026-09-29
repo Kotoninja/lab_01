@@ -5,13 +5,18 @@ from toolkit import calculator, converter, errors
 
 
 def create_parser():
+    """Generate main parser
+
+    Returns:
+        argparse.ArgumentParser: parser
+    """
     parser = argparse.ArgumentParser(
         prog="toolkit",
         description="CLI app for calculation and converter",
     )
     subparsers = parser.add_subparsers(required=True)
 
-    # calculate
+    # calculator
     calc_parser = subparsers.add_parser("calc")
     calc_parser.add_argument("expression", default="", nargs="?")
     calc_parser.set_defaults(func=calculator.calculate, command="calc")
@@ -28,8 +33,7 @@ def create_parser():
 
 def main() -> None:
     """
-    Обязательнная составляющая программ, которые сдаются. Является точкой входа в приложение
-    :return: Данная функция ничего не возвращает
+    Entry point to the application
     """
     parser = create_parser()
 

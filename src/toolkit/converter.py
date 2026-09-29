@@ -7,6 +7,16 @@ from toolkit.constans import LENGTH_ENUM, TEMPERATURE_ENUM, WEIGHT_ENUM
 
 # ANCHOR[id=validate]
 def validate(args: argparse.Namespace):
+    """Validate user input
+
+    Args:
+        args (argparse.Namespace): Parsed data
+
+    Raises:
+        errors.UnknownUnitError: неизвестная единица
+        errors.IncompatibleUnitsError: несовместимые единицы
+        errors.TemperaturesBelowAbsoluteZero: температура ниже абсолютного нуля
+    """
     flag_from: str = str(args.flag_from).lower()
     flag_to: str = str(args.flag_to).lower()
 
@@ -37,14 +47,14 @@ def validate(args: argparse.Namespace):
     ):
         raise errors.TemperaturesBelowAbsoluteZero
 
-    # try:
-    #     different_cotegory()
-    # except errors.DifferentConverterCategory:
-    #     raise errors.DifferentConverterCategory
-
 
 # ANCHOR[id=convert]
 def convert(args: argparse.Namespace):
+    """Entry point to the converter, where build all logic
+
+    Args:
+        args (argparse.Namespace): Parsed data
+    """
     validate(args=args)
 
     value: float = args.value  # TODO Add Decimal
@@ -55,8 +65,18 @@ def convert(args: argparse.Namespace):
 
     sys.stdout.write(str(result) + "\n")
 
-
+# ANCHOR[id=convert_units]
 def convert_units(value: float, flag_from: str, flag_to: str) -> float:
+    """Convert units of measurement from one category to another.
+
+    Args:
+        value (float): What number are we converting?
+        flag_from (str): From which category are we converting?
+        flag_to (str): What category are we converting to?
+
+    Returns:
+        float: answer
+    """
     answer: float = 0
     if flag_from in LENGTH_ENUM:
         answer = convert_length(value=value, flag_from=flag_from, flag_to=flag_to)
@@ -67,7 +87,16 @@ def convert_units(value: float, flag_from: str, flag_to: str) -> float:
     return answer
 
 
+# ANCHOR[id=get_units_of_measurement]
 def get_units_of_measurement(value: str) -> float:
+    """Convert length to standard (meters)
+
+    Args:
+        value (str): value
+
+    Returns:
+        float: number
+    """
     match value:
         case "mm":
             return 0.001
@@ -80,7 +109,18 @@ def get_units_of_measurement(value: str) -> float:
     return 0
 
 
+# ANCHOR[id=convert_length]
 def convert_length(value: float, flag_from: str, flag_to: str) -> float:
+    """Convert length
+
+    Args:
+        value (float): [mm, cm, m, km]
+        flag_from (str): From which category are we converting?
+        flag_to (str): From which category are we converting?
+
+    Returns:
+        float: answer
+    """
     if flag_from == flag_to:
         return value
 
@@ -88,7 +128,18 @@ def convert_length(value: float, flag_from: str, flag_to: str) -> float:
     return meters / get_units_of_measurement(flag_to)
 
 
+# ANCHOR[id=convert_temperature]
 def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
+    """Convert temperature
+
+    Args:
+        value (float): [f, c, k]
+        flag_from (str): From which category are we converting?
+        flag_to (str): From which category are we converting?
+
+    Returns:
+        float: answer
+    """
     if flag_from == flag_to:
         return value
 
@@ -109,7 +160,18 @@ def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
             return celsius
 
 
+# ANCHOR[id=convert_weight]
 def convert_weight(value: float, flag_from: str, flag_to: str) -> float:
+    """Convert weight
+
+    Args:
+        value (float): [g, kg]
+        flag_from (str): From which category are we converting?
+        flag_to (str): From which category are we converting?
+
+    Returns:
+        float: answer
+    """
     if flag_from == flag_to:
         return value
 

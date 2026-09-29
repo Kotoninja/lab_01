@@ -4,9 +4,8 @@ import pytest
 
 from toolkit import calculator, errors
 
+
 # LINK src/toolkit/calculator.py#calculate
-
-
 def test_calculate_zero_length_input():
     with pytest.RaisesExc(errors.EmptyExpressionError):
         calculator.calculate(args=argparse.Namespace(expression=""))
@@ -48,6 +47,7 @@ def test_tokenization_default_cases():
         "-4",
         ")",
     ]
+
 
 # LINK src/toolkit/calculator.py#convert_infix_to_postfix
 def test_convert_infix_to_postfix():
@@ -132,6 +132,7 @@ def test_isnumber():
     assert calculator.isnumber("02")
 
 
+# LINK src/toolkit/calculator.py#use_operation
 def test_use_operation():
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.use_operation(1, 1, "^")
@@ -175,6 +176,7 @@ def test_calculate(capsys):
     assert capsys.readouterr().out == "4.0"
 
 
+# LINK src/toolkit/calculator.py#higher_or_equal
 def test_higher_or_equal():
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.higher_or_equal(op1="$", op2="+")

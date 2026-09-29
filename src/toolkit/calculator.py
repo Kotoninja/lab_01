@@ -6,6 +6,14 @@ from toolkit import errors
 
 # ANCHOR[id=validate]
 def validate(args: argparse.Namespace):
+    """Validate user input
+
+    Args:
+        args (argparse.Namespace): Parsed data
+
+    Raises:
+        errors.EmptyExpressionError: пустое выражение
+    """
     expression: str = args.expression
     if not len(expression.rstrip()):
         raise errors.EmptyExpressionError
@@ -13,6 +21,11 @@ def validate(args: argparse.Namespace):
 
 # ANCHOR[id=calculate]
 def calculate(args: argparse.Namespace):
+    """Entry point to the calculator, where build all logic
+
+    Args:
+        args (argparse.Namespace): Parsed data
+    """
     validate(args=args)
     tokens: list[str] = tokenization(args.expression)
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
@@ -25,7 +38,7 @@ def tokenization(expression: str) -> list[str]:
     """tokenize input, e.g. expression="11+1" return: ["11", "+", "1"]
 
     Args:
-        expression (str): user input
+        expression (str): expression, for example "11+1"
 
     Returns:
         list[str]: tokenized input
@@ -58,7 +71,20 @@ def tokenization(expression: str) -> list[str]:
     return result
 
 
-def higher_or_equal(op1, op2):
+# ANCHOR[id=higher_or_equal]
+def higher_or_equal(op1: str, op2: str) -> bool:
+    """Compare operator
+
+    Args:
+        op1 (str): operator
+        op2 (str): operator
+
+    Raises:
+        errors.InvalidCharacterError: недопустимый символ
+
+    Returns:
+        bool or error
+    """
     precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "(": 0}
     if op1 not in precedence:
         raise errors.InvalidCharacterError(op1)
@@ -69,6 +95,14 @@ def higher_or_equal(op1, op2):
 
 # ANCHOR[id=convert_infix_to_postfix]
 def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
+    """Convert an infix expression to postfix notation.
+
+    Args:
+        infix_list (list[str]): tokenized expression
+
+    Returns:
+        list[str]: answer
+    """
     postfix_list: list[str] = []
 
     stack: list[str] = []
@@ -95,6 +129,14 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
 
 # ANCHOR[id=isnumber]
 def isnumber(value: str) -> bool:
+    """Value is number or float?
+
+    Args:
+        value (str): "2" or "-2" or "2.0"
+
+    Returns:
+        bool: answer
+    """
     if value.isdigit():
         return True
 
@@ -104,8 +146,22 @@ def isnumber(value: str) -> bool:
     except ValueError:
         return False
 
-
+# ANCHOR[id=use_operation]
 def use_operation(op1: float, op2: float, operation: str) -> float:
+    """Apply a binary arithmetic operator to two operands.
+
+    Args:
+        op1 (float): operand
+        op2 (float): operand
+        operation (str): [+, -, /, *]
+
+    Raises:
+        errors.DivisionByZero: деление на ноль
+        errors.InvalidCharacterError: недопустимый символ
+
+    Returns:
+        float: answer
+    """
     match operation:
         case "+":
             return op1 + op2
@@ -123,6 +179,18 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
 
 # ANCHOR[id=execute_expression]
 def execute_expression(postfix_list: list[str]) -> float:
+    """Evaluate a tokenized postfix (Reverse Polish) expression
+
+    Args:
+        postfix_list (list[str]): Tokenized postfix expression, e.g. ["1", "2", "+"]
+
+    Raises:
+        errors.InvalidNumberError: неверное числовое значение
+        errors.MissingOperandError: пропущенный операнд
+
+    Returns:
+        float: answer
+    """
     stack: list[str] = []
 
     for i in range(len(postfix_list)):

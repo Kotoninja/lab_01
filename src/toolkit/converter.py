@@ -116,7 +116,7 @@ def convert_length(value: float, flag_from: str, flag_to: str) -> float:
     Args:
         value (float): [mm, cm, m, km]
         flag_from (str): From which category are we converting?
-        flag_to (str): From which category are we converting?
+        flag_to (str): What category are we converting to?
 
     Returns:
         float: answer
@@ -135,7 +135,7 @@ def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
     Args:
         value (float): [f, c, k]
         flag_from (str): From which category are we converting?
-        flag_to (str): From which category are we converting?
+        flag_to (str): What category are we converting to?
 
     Returns:
         float: answer
@@ -167,7 +167,7 @@ def convert_weight(value: float, flag_from: str, flag_to: str) -> float:
     Args:
         value (float): [g, kg]
         flag_from (str): From which category are we converting?
-        flag_to (str): From which category are we converting?
+        flag_to (str): What category are we converting to?
 
     Returns:
         float: answer

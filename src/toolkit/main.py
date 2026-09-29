@@ -17,15 +17,28 @@ def create_parser():
     subparsers = parser.add_subparsers(required=True)
 
     # calculator
-    calc_parser = subparsers.add_parser("calc")
-    calc_parser.add_argument("expression", default="", nargs="?")
+    calc_parser = subparsers.add_parser(
+        "calc", help="Calculate a mathematical expression"
+    )
+    calc_parser.add_argument("expression", default="", nargs="?", help="Expression")
     calc_parser.set_defaults(func=calculator.calculate, command="calc")
 
     # converter
-    convert_parser = subparsers.add_parser("convert")
-    convert_parser.add_argument("value", default="", nargs="?", type=float)
-    convert_parser.add_argument("--from", dest="flag_from", required=True)
-    convert_parser.add_argument("--to", dest="flag_to", required=True)
+    convert_parser = subparsers.add_parser(
+        "convert", help="Convert a value from one unit to another"
+    )
+    convert_parser.add_argument(
+        "value", default="", nargs="?", type=float, help="Value to convert"
+    )
+    convert_parser.add_argument(
+        "--from",
+        dest="flag_from",
+        required=True,
+        help="From which category are we converting",
+    )
+    convert_parser.add_argument(
+        "--to", dest="flag_to", required=True, help="What category are we converting to"
+    )
     convert_parser.set_defaults(func=converter.convert, command="converter")
 
     return parser

@@ -1,38 +1,64 @@
-def color(value: str) -> str:
-    return f"\033[31mError: {value}\033[0m"
+class AppError(Exception): ...
 
 
-class ZeroLength(BaseException):
-    text = "{} has zero length"
+class EmptyExpressionError(AppError):
+    """пустое выражение"""
+
+    def __init__(self):
+        super().__init__("Expression is empty.")
 
 
-class FromNone(BaseException):
-    text = "Specify --from value"
+class InvalidCharacterError(AppError):
+    """недопустимый символ"""
+
+    def __init__(self, value: str):
+        super().__init__(f"Invalid character: {value!r}.")
 
 
-class ToNone(BaseException):
-    text = "Specify --to value"
+class MissingOperandError(AppError):
+    """пропущенный операнд"""
+
+    def __init__(self):
+        super().__init__("Missing operand.")
 
 
-class DifferentConverterCategory(BaseException):
-    text = "Different converter category"
+class ConsecutiveOperatorsError(AppError):
+    """два бинарных оператора подряд"""
+
+    def __init__(self):
+        super().__init__("Two binary operators in a row.")
 
 
-class ValidationExpression(BaseException):
-    text = color(value="Invalid mathematical expression syntax.")
+class InvalidNumberError(AppError):
+    """неверное числовое значение"""
+
+    def __init__(self, token: str):
+        super().__init__(f"Invalid number: {token!r}.")
 
 
-class UnknownOperation(BaseException):
-    text = color(value="Unknown operation.")
+class UnknownUnitError(AppError):
+    """неизвестную единицу"""
+
+    def __init__(self, unit: str):
+        super().__init__(f"Unknown unit: {unit!r}.")
 
 
-class DivisionByZero(BaseException):
-    text = color(value="Division by zero.")
+class IncompatibleUnitsError(AppError):
+    """несовместимые единицы"""
+
+    def __init__(self, src: str, dst: str):
+        super().__init__(f"Incompatible units: {src!r} -> {dst!r}.")
 
 
-class ValueError(BaseException):
-    text = color(value="Value must be float")
+class DivisionByZero(AppError):
+    """деление на ноль"""
+
+    def __init__(self):
+        super().__init__("Division by zero.")
 
 
-class TemperaturesBelowAbsoluteZero(BaseException):
-    text = color(value="Temperatures below absolute zero")
+class TemperaturesBelowAbsoluteZero(AppError):
+    """температура ниже абсолютного нуля"""
+
+    def __init__(self):
+        super().__init__("Temperatures below absolute zero.")

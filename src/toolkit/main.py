@@ -1,6 +1,7 @@
 import argparse
+import sys
 
-from toolkit import calculator, converter
+from toolkit import calculator, converter, errors
 
 
 def create_parser():
@@ -18,8 +19,8 @@ def create_parser():
     # converter
     convert_parser = subparsers.add_parser("convert")
     convert_parser.add_argument("value", default="", nargs="?", type=float)
-    convert_parser.add_argument("--from", dest="flag_from")
-    convert_parser.add_argument("--to", dest="flag_to")
+    convert_parser.add_argument("--from", dest="flag_from", required=True)
+    convert_parser.add_argument("--to", dest="flag_to", required=True)
     convert_parser.set_defaults(func=converter.convert, command="converter")
 
     return parser
@@ -34,4 +35,10 @@ def main() -> None:
 
     # Parse arguments and select func
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+        sys.stdout.write("\n")
+        sys.exit(0)
+    except errors.AppError as e:
+        sys.stderr.write(f"\033[31mError: {e}\033[0m\n")
+        sys.exit(2)

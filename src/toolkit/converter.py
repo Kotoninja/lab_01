@@ -8,21 +8,27 @@ from toolkit.constans import LENGTH_ENUM, TEMPERATURE_ENUM, WEIGHT_ENUM
 # ANCHOR[id=validate]
 def validate(args: argparse.Namespace):
     flag_from: str = str(args.flag_from).lower()
-    if not len(flag_from.rstrip()):
-        raise errors.FromNone
-
     flag_to: str = str(args.flag_to).lower()
-    if not len(flag_to.rstrip()):
-        raise errors.ToNone
 
-    def different_cotegory():
-        if flag_from in LENGTH_ENUM and flag_to in LENGTH_ENUM:
-            return
-        if flag_from in TEMPERATURE_ENUM and flag_to in TEMPERATURE_ENUM:
-            return
-        if flag_from in WEIGHT_ENUM and flag_to in WEIGHT_ENUM:
-            return
-        raise errors.DifferentConverterCategory
+    if (
+        flag_from not in LENGTH_ENUM
+        and flag_from not in TEMPERATURE_ENUM
+        and flag_from not in WEIGHT_ENUM
+    ):
+        raise errors.UnknownUnitError(flag_from)
+    elif (
+        flag_to not in LENGTH_ENUM
+        and flag_to not in TEMPERATURE_ENUM
+        and flag_to not in WEIGHT_ENUM
+    ):
+        raise errors.UnknownUnitError(flag_to)
+
+    if (
+        (flag_from in LENGTH_ENUM and flag_to not in LENGTH_ENUM)
+        or (flag_from in WEIGHT_ENUM and flag_to not in WEIGHT_ENUM)
+        or (flag_from in TEMPERATURE_ENUM and flag_to not in TEMPERATURE_ENUM)
+    ):
+        raise errors.IncompatibleUnitsError(flag_from, flag_to)
 
     if (
         (flag_from == "c" and args.value <= -273)
@@ -31,31 +37,23 @@ def validate(args: argparse.Namespace):
     ):
         raise errors.TemperaturesBelowAbsoluteZero
 
-    try:
-        different_cotegory()
-    except errors.DifferentConverterCategory:
-        raise errors.DifferentConverterCategory
+    # try:
+    #     different_cotegory()
+    # except errors.DifferentConverterCategory:
+    #     raise errors.DifferentConverterCategory
 
 
 # ANCHOR[id=convert]
 def convert(args: argparse.Namespace):
-    try:
-        validate(args=args)
-    except (
-        errors.FromNone,
-        errors.ToNone,
-        errors.DifferentConverterCategory,
-        errors.TemperaturesBelowAbsoluteZero,
-    ) as e:
-        sys.stderr.write(f"{e.text}\n")
-    else:
-        value: float = args.value  # TODO Add Decimal
-        flag_from: str = str(args.flag_from).lower()
-        flag_to: str = str(args.flag_to).lower()
+    validate(args=args)
 
-        result: float = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
+    value: float = args.value  # TODO Add Decimal
+    flag_from: str = str(args.flag_from).lower()
+    flag_to: str = str(args.flag_to).lower()
 
-        sys.stdout.write(str(result) + "\n")
+    result: float = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
+
+    sys.stdout.write(str(result) + "\n")
 
 
 def convert_units(value: float, flag_from: str, flag_to: str) -> float:

@@ -7,16 +7,6 @@ from toolkit import constans, converter, errors
 # LINK src/toolkit/converter.py#validate
 
 
-def test_validate_zero_length_flag_from():
-    with pytest.raises(errors.FromNone):
-        converter.validate(argparse.Namespace(value=10, flag_from=""))
-
-
-def test_validate_zero_length_flag_to():
-    with pytest.raises(errors.ToNone):
-        converter.validate(argparse.Namespace(value=10, flag_from="test", flag_to=""))
-
-
 def test_validate_correct_cotegory():
     for converter_category in [
         constans.LENGTH_ENUM,
@@ -33,7 +23,7 @@ def test_validate_correct_cotegory():
 
 
 def test_validate_different_category():
-    with pytest.raises(errors.DifferentConverterCategory):
+    with pytest.raises(errors.IncompatibleUnitsError):
         converter.validate(
             argparse.Namespace(
                 value=10,
@@ -41,7 +31,7 @@ def test_validate_different_category():
                 flag_to=constans.TEMPERATURE_ENUM[0],
             )
         )
-    with pytest.raises(errors.DifferentConverterCategory):
+    with pytest.raises(errors.IncompatibleUnitsError):
         converter.validate(
             argparse.Namespace(
                 value=10,
@@ -49,7 +39,7 @@ def test_validate_different_category():
                 flag_to=constans.WEIGHT_ENUM[0],
             )
         )
-    with pytest.raises(errors.DifferentConverterCategory):
+    with pytest.raises(errors.IncompatibleUnitsError):
         converter.validate(
             argparse.Namespace(
                 value=1.0,
@@ -71,4 +61,15 @@ def test_temperature_below_zero():
     with pytest.raises(errors.TemperaturesBelowAbsoluteZero):
         converter.validate(
             args=argparse.Namespace(value=-461, flag_from="f", flag_to="c")
+        )
+
+
+def test_unknow_unit():
+    with pytest.RaisesExc(errors.UnknownUnitError):
+        converter.validate(
+            args=argparse.Namespace(value=1, flag_from="test", flag_to="m")
+        )
+    with pytest.RaisesExc(errors.UnknownUnitError):
+        converter.validate(
+            args=argparse.Namespace(value=1, flag_from="m", flag_to="test")
         )

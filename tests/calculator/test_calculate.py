@@ -49,7 +49,6 @@ def test_tokenization_default_cases():
         ")",
     ]
 
-
 # LINK src/toolkit/calculator.py#convert_infix_to_postfix
 def test_convert_infix_to_postfix():
     assert calculator.convert_infix_to_postfix(calculator.tokenization("")) == []
@@ -162,3 +161,22 @@ def test_execute_expression():
 
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.execute_expression(convert_to_postfix("a +a "))
+
+    with pytest.RaisesExc(errors.MissingOperandError):
+        calculator.execute_expression(convert_to_postfix("10 2"))
+    with pytest.RaisesExc(errors.MissingOperandError):
+        calculator.execute_expression(convert_to_postfix("10 + + + + 2"))
+    with pytest.RaisesExc(errors.InvalidNumberError):
+        calculator.execute_expression(["&"])
+
+
+def test_calculate(capsys):
+    calculator.calculate(args=argparse.Namespace(expression="2+2"))
+    assert capsys.readouterr().out == "4.0"
+
+
+def test_higher_or_equal():
+    with pytest.RaisesExc(errors.InvalidCharacterError):
+        calculator.higher_or_equal(op1="$", op2="+")
+    with pytest.RaisesExc(errors.InvalidCharacterError):
+        calculator.higher_or_equal(op1="+", op2="$")

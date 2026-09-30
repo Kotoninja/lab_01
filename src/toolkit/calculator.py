@@ -47,11 +47,11 @@ def tokenization(expression: str) -> list[str]:
     result: list[str] = []
 
     buffer: str = ""
-    for i in range(len(expression)):
+    i: int = 0
+    while i < len(expression):
         symbol: str = expression[i].lower()
 
-        # print(symbol not in "/*+-% ")
-        if not symbol.isdigit() and symbol not in "/*+-%.() ":
+        if not symbol.isdigit() and symbol not in "/*+-%.()% ":
             raise errors.InvalidCharacterError(symbol)
 
         if (isnumber(symbol) or symbol == ".") or (
@@ -63,9 +63,15 @@ def tokenization(expression: str) -> list[str]:
             if len(buffer):
                 result.append(buffer)
                 buffer = ""
+
+            if expression[i] == "/" and expression[i + 1] == "/":
+                result.append("//")
+                i += 2
+                continue
+
             if not symbol.isspace():
                 result.append(symbol)
-
+        i += 1
     if len(buffer):
         result.append(buffer)
     return result
@@ -146,6 +152,7 @@ def isnumber(value: str) -> bool:
     except ValueError:
         return False
 
+
 # ANCHOR[id=use_operation]
 def use_operation(op1: float, op2: float, operation: str) -> float:
     """Apply a binary arithmetic operator to two operands.
@@ -173,6 +180,14 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
             if op2 == 0:
                 raise errors.DivisionByZero
             return op1 / op2
+        case "//":
+            if op2 == 0:
+                raise errors.DivisionByZero
+            return op1 // op2
+        case "%":
+            if op2 == 0:
+                raise errors.DivisionByZero
+            return op1 % op2
         case _:
             raise errors.InvalidCharacterError(operation)
 
@@ -196,14 +211,13 @@ def execute_expression(postfix_list: list[str]) -> float:
     for i in range(len(postfix_list)):
         symbol: str = postfix_list[i]
 
-        is_operation: bool = symbol in "+-*/"
+        is_operation: bool = symbol in ["+", "-", "*", "/", "%", "//"]
 
         if not is_operation:
-            value: str = postfix_list[i]
             if isnumber(symbol):
-                stack.append(value)
+                stack.append(symbol)
             else:
-                raise errors.InvalidNumberError(value)
+                raise errors.InvalidNumberError(symbol)
             continue
 
         if is_operation and len(stack) < 2:

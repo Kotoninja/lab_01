@@ -154,8 +154,14 @@ def test_execute_expression():
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42.0
     assert calculator.execute_expression(convert_to_postfix("10/2")) == 5.0
+    assert calculator.execute_expression(convert_to_postfix("10//2")) == 5.0
+    assert calculator.execute_expression(convert_to_postfix("10%2")) == 0.0
     with pytest.RaisesExc(errors.DivisionByZero):
         assert calculator.execute_expression(convert_to_postfix("10/0")) == 5.0
+    with pytest.RaisesExc(errors.DivisionByZero):
+        assert calculator.execute_expression(convert_to_postfix("10//0")) == 5.0
+    with pytest.RaisesExc(errors.DivisionByZero):
+        assert calculator.execute_expression(convert_to_postfix("10%0")) == 5.0
 
     assert calculator.execute_expression(convert_to_postfix("(1+2)*3")) == 9.0
     assert calculator.execute_expression(convert_to_postfix("1+2*3")) == 7.0

@@ -20,7 +20,7 @@ def create_parser():
     calc_parser = subparsers.add_parser(
         "calc", help="Calculate a mathematical expression"
     )
-    calc_parser.add_argument("expression", default="", nargs="?", help="Expression")
+    calc_parser.add_argument("expression", default="", type=str, nargs="?", help="Expression")
     calc_parser.set_defaults(func=calculator.calculate, command="calc")
 
     # converter

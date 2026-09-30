@@ -66,7 +66,7 @@ def convert(args: argparse.Namespace):
 
     result: Decimal = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
 
-    sys.stdout.write(str(result) + "\n")
+    sys.stdout.write(str(result))
 
     if hasattr(args, "command"):
         data = constans.JSON_RESPONSE(

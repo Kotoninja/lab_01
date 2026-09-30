@@ -43,6 +43,7 @@ def validate_tokenization(infix_list: list[str]):
         elif infix_list[i] in operation_list and infix_list[i + 1] in operation_list:
             raise errors.ConsecutiveOperatorsError
 
+
 # ANCHOR[id=validate_parentheses]
 def validate_parentheses(expression: str):
     """Check parentheses sequence
@@ -149,7 +150,7 @@ def higher_or_equal(op1: str, op2: str) -> bool:
     Returns:
         bool or error
     """
-    precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "(": 0}
+    precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "//": 2, "%": 2, "(": 0}
     if op1 not in precedence:
         raise errors.InvalidCharacterError(op1)
     if op2 not in precedence:

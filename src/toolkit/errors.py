@@ -50,15 +50,22 @@ class IncompatibleUnitsError(AppError):
         super().__init__(f"Incompatible units: {src!r} -> {dst!r}.")
 
 
-class DivisionByZero(AppError):
+class DivisionByZeroError(AppError):
     """деление на ноль"""
 
     def __init__(self):
         super().__init__("Division by zero.")
 
 
-class TemperaturesBelowAbsoluteZero(AppError):
+class TemperaturesBelowAbsoluteZeroError(AppError):
     """температура ниже абсолютного нуля"""
 
     def __init__(self):
         super().__init__("Temperatures below absolute zero.")
+
+
+class InvalidParenthesesError(AppError):
+    """неверная скобочная последовательность"""
+
+    def __init__(self):
+        super().__init__("Invalid parentheses.")

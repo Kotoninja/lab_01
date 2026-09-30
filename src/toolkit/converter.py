@@ -1,8 +1,8 @@
 import argparse
 import sys
+from decimal import Decimal
 
-from toolkit import errors
-from toolkit.constans import LENGTH_ENUM, TEMPERATURE_ENUM, WEIGHT_ENUM
+from toolkit import config, constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -21,22 +21,25 @@ def validate(args: argparse.Namespace):
     flag_to: str = str(args.flag_to).lower()
 
     if (
-        flag_from not in LENGTH_ENUM
-        and flag_from not in TEMPERATURE_ENUM
-        and flag_from not in WEIGHT_ENUM
+        flag_from not in constans.LENGTH_ENUM
+        and flag_from not in constans.TEMPERATURE_ENUM
+        and flag_from not in constans.WEIGHT_ENUM
     ):
         raise errors.UnknownUnitError(flag_from)
     elif (
-        flag_to not in LENGTH_ENUM
-        and flag_to not in TEMPERATURE_ENUM
-        and flag_to not in WEIGHT_ENUM
+        flag_to not in constans.LENGTH_ENUM
+        and flag_to not in constans.TEMPERATURE_ENUM
+        and flag_to not in constans.WEIGHT_ENUM
     ):
         raise errors.UnknownUnitError(flag_to)
 
     if (
-        (flag_from in LENGTH_ENUM and flag_to not in LENGTH_ENUM)
-        or (flag_from in WEIGHT_ENUM and flag_to not in WEIGHT_ENUM)
-        or (flag_from in TEMPERATURE_ENUM and flag_to not in TEMPERATURE_ENUM)
+        (flag_from in constans.LENGTH_ENUM and flag_to not in constans.LENGTH_ENUM)
+        or (flag_from in constans.WEIGHT_ENUM and flag_to not in constans.WEIGHT_ENUM)
+        or (
+            flag_from in constans.TEMPERATURE_ENUM
+            and flag_to not in constans.TEMPERATURE_ENUM
+        )
     ):
         raise errors.IncompatibleUnitsError(flag_from, flag_to)
 
@@ -45,7 +48,7 @@ def validate(args: argparse.Namespace):
         or (flag_from == "k" and args.value <= 0)
         or (flag_from == "f" and args.value <= -460)
     ):
-        raise errors.TemperaturesBelowAbsoluteZero
+        raise errors.TemperaturesBelowAbsoluteZeroError
 
 
 # ANCHOR[id=convert]
@@ -57,95 +60,104 @@ def convert(args: argparse.Namespace):
     """
     validate(args=args)
 
-    value: float = args.value  # TODO Add Decimal
+    value: Decimal = Decimal(args.value)
     flag_from: str = str(args.flag_from).lower()
     flag_to: str = str(args.flag_to).lower()
 
-    result: float = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
+    result: Decimal = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
 
     sys.stdout.write(str(result) + "\n")
 
+    if hasattr(args, "command"):
+        data = constans.JSON_RESPONSE(
+            command=args.command,
+            exression=f"{value} --from {flag_from} --to {flag_to}",
+            answer=float(result),
+        )
+        repository.add(data=data)
+
+
 # ANCHOR[id=convert_units]
-def convert_units(value: float, flag_from: str, flag_to: str) -> float:
+def convert_units(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """Convert units of measurement from one category to another.
 
     Args:
-        value (float): What number are we converting?
+        value (Decimal): What number are we converting?
         flag_from (str): From which category are we converting?
         flag_to (str): What category are we converting to?
 
     Returns:
-        float: answer
+        Decimal: answer
     """
-    answer: float = 0
-    if flag_from in LENGTH_ENUM:
+    answer: Decimal = Decimal("0.00")
+    if flag_from in constans.LENGTH_ENUM:
         answer = convert_length(value=value, flag_from=flag_from, flag_to=flag_to)
-    elif flag_from in WEIGHT_ENUM:
+    elif flag_from in constans.WEIGHT_ENUM:
         answer = convert_weight(value=value, flag_from=flag_from, flag_to=flag_to)
-    elif flag_from in TEMPERATURE_ENUM:
+    elif flag_from in constans.TEMPERATURE_ENUM:
         answer = convert_temperature(value=value, flag_from=flag_from, flag_to=flag_to)
     return answer
 
 
 # ANCHOR[id=get_units_of_measurement]
-def get_units_of_measurement(value: str) -> float:
+def get_units_of_measurement(value: str) -> str:
     """Convert length to standard (meters)
 
     Args:
         value (str): value
 
     Returns:
-        float: number
+        Decimal: number
     """
     match value:
         case "mm":
-            return 0.001
+            return config.SETTINGS["length"]["mm"]
         case "cm":
-            return 0.01
+            return config.SETTINGS["length"]["cm"]
         case "m":
-            return 1
+            return config.SETTINGS["length"]["m"]
         case "km":
-            return 1000
-    return 0
+            return config.SETTINGS["length"]["km"]
+    raise errors.UnknownUnitError(value)
 
 
 # ANCHOR[id=convert_length]
-def convert_length(value: float, flag_from: str, flag_to: str) -> float:
+def convert_length(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """Convert length
 
     Args:
-        value (float): [mm, cm, m, km]
+        value (Decimal): [mm, cm, m, km]
         flag_from (str): From which category are we converting?
         flag_to (str): What category are we converting to?
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     if flag_from == flag_to:
         return value
 
-    meters: float = value * get_units_of_measurement(flag_from)
-    return meters / get_units_of_measurement(flag_to)
+    meters: Decimal = Decimal(value * Decimal(get_units_of_measurement(flag_from)))
+    return meters / Decimal(get_units_of_measurement(flag_to))
 
 
 # ANCHOR[id=convert_temperature]
-def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
+def convert_temperature(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """Convert temperature
 
     Args:
-        value (float): [f, c, k]
+        value (Decimal): [f, c, k]
         flag_from (str): From which category are we converting?
         flag_to (str): What category are we converting to?
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     if flag_from == flag_to:
         return value
 
     match flag_from:
         case "f":
-            celsius = (value - 32) / 1.8
+            celsius = (value - 32) / Decimal("1.8")
         case "k":
             celsius = value - 273
         case _:
@@ -153,7 +165,7 @@ def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
 
     match flag_to:
         case "f":
-            return (celsius * 1.8) + 32
+            return (celsius * Decimal("1.8")) + 32
         case "k":
             return celsius + 273
         case _:
@@ -161,21 +173,22 @@ def convert_temperature(value: float, flag_from: str, flag_to: str) -> float:
 
 
 # ANCHOR[id=convert_weight]
-def convert_weight(value: float, flag_from: str, flag_to: str) -> float:
+def convert_weight(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """Convert weight
 
     Args:
-        value (float): [g, kg]
+        value (Decimal): [g, kg]
         flag_from (str): From which category are we converting?
         flag_to (str): What category are we converting to?
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     if flag_from == flag_to:
         return value
 
-    if flag_from == "g":
-        return value / 1000
-    else:
-        return value * 1000
+    return (
+        value
+        * Decimal(config.SETTINGS["weight"][flag_from])
+        / Decimal(config.SETTINGS["weight"][flag_to])
+    )

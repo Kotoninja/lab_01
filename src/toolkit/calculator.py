@@ -1,7 +1,8 @@
 import argparse
 import sys
+from decimal import Decimal, InvalidOperation
 
-from toolkit import errors
+from toolkit import constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -17,6 +18,54 @@ def validate(args: argparse.Namespace):
     expression: str = args.expression
     if not len(expression.rstrip()):
         raise errors.EmptyExpressionError
+    validate_parentheses(expression=expression)
+
+
+# ANCHOR[id=validate_tokenization]
+def validate_tokenization(infix_list: list[str]):
+    """Validate tokenized expression
+
+    Args:
+        infix_list (list[str]): Tokenized expression
+
+    Raises:
+        errors.InvalidCharacterError: недопустимый символ
+        errors.MissingOperandError: пропущенный операнд
+        errors.ConsecutiveOperatorsError: два бинарных оператора подряд
+    """
+    if len(infix_list) == 1 and not isnumber(infix_list[0]):
+        raise errors.InvalidCharacterError(infix_list[0])
+
+    operation_list: list[str] = ["//", "/", "+", "-", "*", "%"]
+    for i in range(len(infix_list) - 1):
+        if isnumber(infix_list[i]) and isnumber(infix_list[i + 1]):
+            raise errors.MissingOperandError
+        elif infix_list[i] in operation_list and infix_list[i + 1] in operation_list:
+            raise errors.ConsecutiveOperatorsError
+
+# ANCHOR[id=validate_parentheses]
+def validate_parentheses(expression: str):
+    """Check parentheses sequence
+
+    Args:
+        expression (str): exression
+
+    Raises:
+        errors.InvalidParenthesesError: неверная скобочная последовательность
+    """
+    stack: list[str] = []
+
+    for symbol in expression:
+        if symbol == "(":
+            stack.append(symbol)
+        elif symbol == ")":
+            if stack and stack[-1] == "(":
+                stack.pop()
+            else:
+                raise errors.InvalidParenthesesError
+
+    if stack:
+        raise errors.InvalidParenthesesError
 
 
 # ANCHOR[id=calculate]
@@ -29,8 +78,15 @@ def calculate(args: argparse.Namespace):
     validate(args=args)
     tokens: list[str] = tokenization(args.expression)
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
-    result: float = execute_expression(postfix_list=postfix_convertation)
-    sys.stdout.write(f"{result}")
+    result: Decimal = execute_expression(postfix_list=postfix_convertation)
+
+    sys.stdout.write(str(result))
+
+    if hasattr(args, "command"):
+        data = constans.JSON_RESPONSE(
+            command=args.command, exression=args.expression, answer=float(result)
+        )
+        repository.add(data=data)
 
 
 # ANCHOR[id=tokenization]
@@ -47,11 +103,11 @@ def tokenization(expression: str) -> list[str]:
     result: list[str] = []
 
     buffer: str = ""
-    for i in range(len(expression)):
+    i: int = 0
+    while i < len(expression):
         symbol: str = expression[i].lower()
 
-        # print(symbol not in "/*+-% ")
-        if not symbol.isdigit() and symbol not in "/*+-%.() ":
+        if not symbol.isdigit() and symbol not in "/*+-%.()% ":
             raise errors.InvalidCharacterError(symbol)
 
         if (isnumber(symbol) or symbol == ".") or (
@@ -63,11 +119,19 @@ def tokenization(expression: str) -> list[str]:
             if len(buffer):
                 result.append(buffer)
                 buffer = ""
+
+            if expression[i] == "/" and expression[i + 1] == "/":
+                result.append("//")
+                i += 2
+                continue
+
             if not symbol.isspace():
                 result.append(symbol)
-
+        i += 1
     if len(buffer):
         result.append(buffer)
+
+    validate_tokenization(result)
     return result
 
 
@@ -129,7 +193,7 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
 
 # ANCHOR[id=isnumber]
 def isnumber(value: str) -> bool:
-    """Value is number or float?
+    """Value is number?
 
     Args:
         value (str): "2" or "-2" or "2.0"
@@ -141,18 +205,19 @@ def isnumber(value: str) -> bool:
         return True
 
     try:
-        float(value)
+        Decimal(value)
         return True
-    except ValueError:
+    except InvalidOperation:
         return False
 
+
 # ANCHOR[id=use_operation]
-def use_operation(op1: float, op2: float, operation: str) -> float:
+def use_operation(op1: Decimal, op2: Decimal, operation: str) -> Decimal:
     """Apply a binary arithmetic operator to two operands.
 
     Args:
-        op1 (float): operand
-        op2 (float): operand
+        op1 (Decimal): operand
+        op2 (Decimal): operand
         operation (str): [+, -, /, *]
 
     Raises:
@@ -160,7 +225,7 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
         errors.InvalidCharacterError: недопустимый символ
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     match operation:
         case "+":
@@ -171,14 +236,22 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
             return op1 * op2
         case "/":
             if op2 == 0:
-                raise errors.DivisionByZero
+                raise errors.DivisionByZeroError
             return op1 / op2
+        case "//":
+            if op2 == 0:
+                raise errors.DivisionByZeroError
+            return op1 // op2
+        case "%":
+            if op2 == 0:
+                raise errors.DivisionByZeroError
+            return op1 % op2
         case _:
             raise errors.InvalidCharacterError(operation)
 
 
 # ANCHOR[id=execute_expression]
-def execute_expression(postfix_list: list[str]) -> float:
+def execute_expression(postfix_list: list[str]) -> Decimal:
     """Evaluate a tokenized postfix (Reverse Polish) expression
 
     Args:
@@ -189,31 +262,30 @@ def execute_expression(postfix_list: list[str]) -> float:
         errors.MissingOperandError: пропущенный операнд
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     stack: list[str] = []
 
     for i in range(len(postfix_list)):
         symbol: str = postfix_list[i]
 
-        is_operation: bool = symbol in "+-*/"
+        is_operation: bool = symbol in ["+", "-", "*", "/", "%", "//"]
 
         if not is_operation:
-            value: str = postfix_list[i]
             if isnumber(symbol):
-                stack.append(value)
+                stack.append(symbol)
             else:
-                raise errors.InvalidNumberError(value)
+                raise errors.InvalidNumberError(symbol)
             continue
 
         if is_operation and len(stack) < 2:
             raise errors.MissingOperandError
 
-        first: float = float(stack.pop())
-        second: float = float(stack.pop())
+        first: Decimal = Decimal(stack.pop())
+        second: Decimal = Decimal(stack.pop())
 
         stack.append(str(use_operation(second, first, symbol)))
 
     if len(stack) != 1:
         raise errors.MissingOperandError
-    return float(stack.pop())
+    return Decimal(stack.pop())

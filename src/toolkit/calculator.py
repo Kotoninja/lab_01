@@ -1,5 +1,6 @@
 import argparse
 import sys
+from decimal import Decimal, InvalidOperation, getcontext
 
 from toolkit import errors
 
@@ -27,10 +28,11 @@ def calculate(args: argparse.Namespace):
         args (argparse.Namespace): Parsed data
     """
     validate(args=args)
+    getcontext().prec = 6
     tokens: list[str] = tokenization(args.expression)
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
-    result: float = execute_expression(postfix_list=postfix_convertation)
-    sys.stdout.write(f"{result}")
+    result: Decimal = execute_expression(postfix_list=postfix_convertation)
+    sys.stdout.write(str(result))
 
 
 # ANCHOR[id=validate_tokenization]
@@ -49,7 +51,7 @@ def validate_tokenization(infix_list: list[str]):
         raise errors.InvalidCharacterError(infix_list[0])
 
     operation_list: list[str] = ["//", "/", "+", "-", "*", "%"]
-    for i in range(0, len(infix_list) - 1):
+    for i in range(len(infix_list) - 1):
         if isnumber(infix_list[i]) and isnumber(infix_list[i + 1]):
             raise errors.MissingOperandError
         elif infix_list[i] in operation_list and infix_list[i + 1] in operation_list:
@@ -160,7 +162,7 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
 
 # ANCHOR[id=isnumber]
 def isnumber(value: str) -> bool:
-    """Value is number or float?
+    """Value is number?
 
     Args:
         value (str): "2" or "-2" or "2.0"
@@ -172,19 +174,19 @@ def isnumber(value: str) -> bool:
         return True
 
     try:
-        float(value)
+        Decimal(value)
         return True
-    except ValueError:
+    except InvalidOperation:
         return False
 
 
 # ANCHOR[id=use_operation]
-def use_operation(op1: float, op2: float, operation: str) -> float:
+def use_operation(op1: Decimal, op2: Decimal, operation: str) -> Decimal:
     """Apply a binary arithmetic operator to two operands.
 
     Args:
-        op1 (float): operand
-        op2 (float): operand
+        op1 (Decimal): operand
+        op2 (Decimal): operand
         operation (str): [+, -, /, *]
 
     Raises:
@@ -192,7 +194,7 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
         errors.InvalidCharacterError: недопустимый символ
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     match operation:
         case "+":
@@ -218,7 +220,7 @@ def use_operation(op1: float, op2: float, operation: str) -> float:
 
 
 # ANCHOR[id=execute_expression]
-def execute_expression(postfix_list: list[str]) -> float:
+def execute_expression(postfix_list: list[str]) -> Decimal:
     """Evaluate a tokenized postfix (Reverse Polish) expression
 
     Args:
@@ -229,7 +231,7 @@ def execute_expression(postfix_list: list[str]) -> float:
         errors.MissingOperandError: пропущенный операнд
 
     Returns:
-        float: answer
+        Decimal: answer
     """
     stack: list[str] = []
 
@@ -248,11 +250,11 @@ def execute_expression(postfix_list: list[str]) -> float:
         if is_operation and len(stack) < 2:
             raise errors.MissingOperandError
 
-        first: float = float(stack.pop())
-        second: float = float(stack.pop())
+        first: Decimal = Decimal(stack.pop())
+        second: Decimal = Decimal(stack.pop())
 
         stack.append(str(use_operation(second, first, symbol)))
 
     if len(stack) != 1:
         raise errors.MissingOperandError
-    return float(stack.pop())
+    return Decimal(stack.pop())

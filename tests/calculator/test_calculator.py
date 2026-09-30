@@ -1,4 +1,5 @@
 import argparse
+from decimal import Decimal
 
 import pytest
 
@@ -10,6 +11,9 @@ def test_calculate_zero_length_input():
     with pytest.RaisesExc(errors.EmptyExpressionError):
         calculator.calculate(args=argparse.Namespace(expression=""))
 
+def test_calculate(capsys):
+    calculator.calculate(args=argparse.Namespace(expression="2+2"))
+    assert capsys.readouterr().out == "4"
 
 # LINK src/toolkit/calculator.py#tokenization
 def test_tokenization_unary_operator_before_number():
@@ -131,7 +135,7 @@ def test_isnumber():
 # LINK src/toolkit/calculator.py#use_operation
 def test_use_operation():
     with pytest.RaisesExc(errors.InvalidCharacterError):
-        calculator.use_operation(1, 1, "^")
+        calculator.use_operation(Decimal(1), Decimal(1), "^")
 
 
 def convert_to_postfix(expression: str) -> list[str]:
@@ -146,7 +150,7 @@ def test_execute_expression():
     assert calculator.execute_expression(convert_to_postfix("22")) == 22.0
     assert calculator.execute_expression(convert_to_postfix("2+2")) == 4.0
     assert calculator.execute_expression(convert_to_postfix("10-2")) == 8.0
-    assert calculator.execute_expression(convert_to_postfix("2.6+2")) == 4.6
+    assert calculator.execute_expression(convert_to_postfix("2.6+2")) == Decimal('4.6')
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42.0
     assert calculator.execute_expression(convert_to_postfix("10/2")) == 5.0
@@ -161,6 +165,7 @@ def test_execute_expression():
 
     assert calculator.execute_expression(convert_to_postfix("(1+2)*3")) == 9.0
     assert calculator.execute_expression(convert_to_postfix("1+2*3")) == 7.0
+    assert calculator.execute_expression(convert_to_postfix("1.0+6")) == 7.0
 
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.execute_expression(convert_to_postfix("a +a "))
@@ -171,11 +176,6 @@ def test_execute_expression():
         calculator.execute_expression(convert_to_postfix("10 + + + + 2"))
     with pytest.RaisesExc(errors.InvalidNumberError):
         calculator.execute_expression(["&"])
-
-
-def test_calculate(capsys):
-    calculator.calculate(args=argparse.Namespace(expression="2+2"))
-    assert capsys.readouterr().out == "4.0"
 
 
 # LINK src/toolkit/calculator.py#higher_or_equal

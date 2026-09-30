@@ -19,7 +19,7 @@ namespace_packages = true
 exclude_lines = [
     "def main"
 ]
-omit = ["tests/*", "errors.py"]
+omit = ["tests/*", "errors.py", "constans.py"]
 
 
 [tool.pytest.ini_options]

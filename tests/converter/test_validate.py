@@ -2,7 +2,9 @@ import argparse
 
 import pytest
 
-from toolkit import constans, converter, errors
+from toolkit import config, constans, converter, errors
+
+config.load_config()
 
 # LINK src/toolkit/converter.py#validate
 

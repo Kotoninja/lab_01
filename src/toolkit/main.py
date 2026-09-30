@@ -2,7 +2,7 @@ import argparse
 import sys
 from decimal import getcontext
 
-from toolkit import calculator, converter, errors
+from toolkit import calculator, config, converter, errors
 
 
 def create_parser():
@@ -21,7 +21,9 @@ def create_parser():
     calc_parser = subparsers.add_parser(
         "calc", help="Calculate a mathematical expression"
     )
-    calc_parser.add_argument("expression", default="", type=str, nargs="?", help="Expression")
+    calc_parser.add_argument(
+        "expression", default="", type=str, nargs="?", help="Expression"
+    )
     calc_parser.set_defaults(func=calculator.calculate, command="calc")
 
     # converter
@@ -51,6 +53,8 @@ def main() -> None:
     """
     parser = create_parser()
     getcontext().prec = 6
+    config.load_config()
+
     # Parse arguments and select func
     args = parser.parse_args()
     try:

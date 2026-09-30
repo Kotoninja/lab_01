@@ -2,7 +2,7 @@ import argparse
 import sys
 from decimal import Decimal
 
-from toolkit import constans, errors, repository
+from toolkit import config, constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -111,14 +111,14 @@ def get_units_of_measurement(value: str) -> str:
     """
     match value:
         case "mm":
-            return "0.001"
+            return config.SETTINGS["length"]["mm"]
         case "cm":
-            return "0.01"
+            return config.SETTINGS["length"]["cm"]
         case "m":
-            return "1"
+            return config.SETTINGS["length"]["m"]
         case "km":
-            return "1000"
-    return "0"
+            return config.SETTINGS["length"]["km"]
+    raise errors.UnknownUnitError(value)
 
 
 # ANCHOR[id=convert_length]
@@ -187,7 +187,8 @@ def convert_weight(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     if flag_from == flag_to:
         return value
 
-    if flag_from == "g":
-        return value / 1000
-    else:
-        return value * 1000
+    return (
+        value
+        * Decimal(config.SETTINGS["weight"][flag_from])
+        / Decimal(config.SETTINGS["weight"][flag_to])
+    )

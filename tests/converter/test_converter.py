@@ -41,7 +41,8 @@ def test_get_units_of_measurement():
     assert converter.get_units_of_measurement("cm") == "0.01"
     assert converter.get_units_of_measurement("m") == "1"
     assert converter.get_units_of_measurement("km") == "1000"
-    assert converter.get_units_of_measurement("test") == "0"
+    with pytest.RaisesExc(errors.UnknownUnitError):
+        converter.get_units_of_measurement("test")
 
 
 # LINK src/toolkit/converter.py#convert_length
@@ -68,6 +69,9 @@ def test_convert_temperature():
     assert converter.convert_units(
         value=Decimal("1.0"), flag_from="k", flag_to="c"
     ) == Decimal("-272.00")
+    assert converter.convert_units(
+        value=Decimal("32.0"), flag_from="f", flag_to="c"
+    ) == Decimal()
 
 
 # LINK src/toolkit/converter.py#convert_weight

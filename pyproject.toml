@@ -4,5 +4,29 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
+    "coverage>=7.16.1",
+    "mypy>=2.3.1",
     "pytest>=8.4.2",
+    "ruff>=0.16.8",
 ]
+
+[tool.mypy]
+explicit_package_bases = true
+mypy_path = "src"
+namespace_packages = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "def main"
+]
+omit = [
+    "tests/*",
+    "errors.py",
+    "constans.py",
+    "repository.py",
+    "config.py",
+]
+
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

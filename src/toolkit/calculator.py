@@ -1,6 +1,6 @@
 import argparse
 import sys
-from decimal import Decimal, InvalidOperation, getcontext
+from decimal import Decimal, InvalidOperation
 
 from toolkit import constans, errors, repository
 
@@ -28,7 +28,6 @@ def calculate(args: argparse.Namespace):
         args (argparse.Namespace): Parsed data
     """
     validate(args=args)
-    getcontext().prec = 6
 
     tokens: list[str] = tokenization(args.expression)
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)

@@ -1,5 +1,6 @@
 import argparse
 import sys
+from decimal import getcontext
 
 from toolkit import calculator, converter, errors
 
@@ -49,7 +50,7 @@ def main() -> None:
     Entry point to the application
     """
     parser = create_parser()
-
+    getcontext().prec = 6
     # Parse arguments and select func
     args = parser.parse_args()
     try:

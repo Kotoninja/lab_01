@@ -1,3 +1,11 @@
 LENGTH_ENUM: list[str] = ["mm", "cm", "m", "km"]
 WEIGHT_ENUM: list[str] = ["g", "kg"]
 TEMPERATURE_ENUM: list[str] = ["c", "f", "k"]
+
+
+def JSON_RESPONSE(command, exression, answer):
+    return {
+        "command": command,
+        "exression": exression,
+        "answer": answer,
+    }

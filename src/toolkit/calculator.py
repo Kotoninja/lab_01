@@ -2,7 +2,7 @@ import argparse
 import sys
 from decimal import Decimal, InvalidOperation, getcontext
 
-from toolkit import errors, repository
+from toolkit import constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -29,12 +29,18 @@ def calculate(args: argparse.Namespace):
     """
     validate(args=args)
     getcontext().prec = 6
+
     tokens: list[str] = tokenization(args.expression)
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
     result: Decimal = execute_expression(postfix_list=postfix_convertation)
+
     sys.stdout.write(str(result))
-    data = {"expression": args.expression, "answer": float(result)}
-    repository.add(data=data)
+
+    if hasattr(args, "command"):
+        data = constans.JSON_RESPONSE(
+            command=args.command, exression=args.expression, answer=float(result)
+        )
+        repository.add(data=data)
 
 
 # ANCHOR[id=validate_tokenization]

@@ -396,3 +396,5 @@ cython_debug/
 
 # Ruff_cache
 .ruff_cache/
+
+data.json

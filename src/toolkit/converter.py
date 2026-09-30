@@ -1,8 +1,7 @@
 import argparse
 import sys
 
-from toolkit import errors
-from toolkit.constans import LENGTH_ENUM, TEMPERATURE_ENUM, WEIGHT_ENUM
+from toolkit import constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -21,22 +20,25 @@ def validate(args: argparse.Namespace):
     flag_to: str = str(args.flag_to).lower()
 
     if (
-        flag_from not in LENGTH_ENUM
-        and flag_from not in TEMPERATURE_ENUM
-        and flag_from not in WEIGHT_ENUM
+        flag_from not in constans.LENGTH_ENUM
+        and flag_from not in constans.TEMPERATURE_ENUM
+        and flag_from not in constans.WEIGHT_ENUM
     ):
         raise errors.UnknownUnitError(flag_from)
     elif (
-        flag_to not in LENGTH_ENUM
-        and flag_to not in TEMPERATURE_ENUM
-        and flag_to not in WEIGHT_ENUM
+        flag_to not in constans.LENGTH_ENUM
+        and flag_to not in constans.TEMPERATURE_ENUM
+        and flag_to not in constans.WEIGHT_ENUM
     ):
         raise errors.UnknownUnitError(flag_to)
 
     if (
-        (flag_from in LENGTH_ENUM and flag_to not in LENGTH_ENUM)
-        or (flag_from in WEIGHT_ENUM and flag_to not in WEIGHT_ENUM)
-        or (flag_from in TEMPERATURE_ENUM and flag_to not in TEMPERATURE_ENUM)
+        (flag_from in constans.LENGTH_ENUM and flag_to not in constans.LENGTH_ENUM)
+        or (flag_from in constans.WEIGHT_ENUM and flag_to not in constans.WEIGHT_ENUM)
+        or (
+            flag_from in constans.TEMPERATURE_ENUM
+            and flag_to not in constans.TEMPERATURE_ENUM
+        )
     ):
         raise errors.IncompatibleUnitsError(flag_from, flag_to)
 
@@ -57,13 +59,20 @@ def convert(args: argparse.Namespace):
     """
     validate(args=args)
 
-    value: float = args.value  # TODO Add Decimal
+    value: float = args.value
     flag_from: str = str(args.flag_from).lower()
     flag_to: str = str(args.flag_to).lower()
 
     result: float = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
 
     sys.stdout.write(str(result) + "\n")
+
+    if hasattr(args, "command"):
+        data = constans.JSON_RESPONSE(
+            command=args.command, exression=f"{value} --from {flag_from} --to {flag_to}", answer=float(result)
+        )
+        repository.add(data=data)
+
 
 # ANCHOR[id=convert_units]
 def convert_units(value: float, flag_from: str, flag_to: str) -> float:
@@ -78,11 +87,11 @@ def convert_units(value: float, flag_from: str, flag_to: str) -> float:
         float: answer
     """
     answer: float = 0
-    if flag_from in LENGTH_ENUM:
+    if flag_from in constans.LENGTH_ENUM:
         answer = convert_length(value=value, flag_from=flag_from, flag_to=flag_to)
-    elif flag_from in WEIGHT_ENUM:
+    elif flag_from in constans.WEIGHT_ENUM:
         answer = convert_weight(value=value, flag_from=flag_from, flag_to=flag_to)
-    elif flag_from in TEMPERATURE_ENUM:
+    elif flag_from in constans.TEMPERATURE_ENUM:
         answer = convert_temperature(value=value, flag_from=flag_from, flag_to=flag_to)
     return answer
 

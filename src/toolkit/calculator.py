@@ -2,7 +2,7 @@ import argparse
 import sys
 from decimal import Decimal, InvalidOperation, getcontext
 
-from toolkit import errors
+from toolkit import errors, repository
 
 
 # ANCHOR[id=validate]
@@ -33,6 +33,8 @@ def calculate(args: argparse.Namespace):
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
     result: Decimal = execute_expression(postfix_list=postfix_convertation)
     sys.stdout.write(str(result))
+    data = {"expression": args.expression, "answer": float(result)}
+    repository.add(data=data)
 
 
 # ANCHOR[id=validate_tokenization]

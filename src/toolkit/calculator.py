@@ -33,6 +33,29 @@ def calculate(args: argparse.Namespace):
     sys.stdout.write(f"{result}")
 
 
+# ANCHOR[id=validate_tokenization]
+def validate_tokenization(infix_list: list[str]):
+    """Validate tokenized expression
+
+    Args:
+        infix_list (list[str]): Tokenized expression
+
+    Raises:
+        errors.InvalidCharacterError: недопустимый символ
+        errors.MissingOperandError: пропущенный операнд
+        errors.ConsecutiveOperatorsError: два бинарных оператора подряд
+    """
+    if len(infix_list) == 1 and not isnumber(infix_list[0]):
+        raise errors.InvalidCharacterError(infix_list[0])
+
+    operation_list: list[str] = ["//", "/", "+", "-", "*", "%"]
+    for i in range(0, len(infix_list) - 1):
+        if isnumber(infix_list[i]) and isnumber(infix_list[i + 1]):
+            raise errors.MissingOperandError
+        elif infix_list[i] in operation_list and infix_list[i + 1] in operation_list:
+            raise errors.ConsecutiveOperatorsError
+
+
 # ANCHOR[id=tokenization]
 def tokenization(expression: str) -> list[str]:
     """tokenize input, e.g. expression="11+1" return: ["11", "+", "1"]
@@ -74,6 +97,8 @@ def tokenization(expression: str) -> list[str]:
         i += 1
     if len(buffer):
         result.append(buffer)
+
+    validate_tokenization(result)
     return result
 
 

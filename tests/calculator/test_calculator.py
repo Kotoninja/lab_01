@@ -15,15 +15,13 @@ def test_calculate_zero_length_input():
 def test_tokenization_unary_operator_before_number():
     assert calculator.tokenization("-2 + 1") == ["-2", "+", "1"]
     assert calculator.tokenization("1 + -2") == ["1", "+", "-2"]
-    assert calculator.tokenization("1 -2") == ["1", "-2"]
     assert calculator.tokenization("1 - 2") == ["1", "-", "2"]
     assert calculator.tokenization("(-2)") == ["(", "-2", ")"]
     assert calculator.tokenization("-2") == ["-2"]
     assert calculator.tokenization("1--2") == ["1", "-", "-2"]
     assert calculator.tokenization("-1-2") == ["-1", "-", "2"]
     assert calculator.tokenization("-1--2") == ["-1", "-", "-2"]
-    assert calculator.tokenization("-1-----2") == ["-1", "-", "-", "-", "-", "-2"]
-    assert calculator.tokenization("1 +2") == ["1", "+2"]
+    assert calculator.tokenization("1 ++2") == ["1", "+", "+2"]
     assert calculator.tokenization("++1 ++2") == ["+", "+1", "+", "+2"]
     assert calculator.tokenization("1++2") == ["1", "+", "+2"]
 
@@ -67,11 +65,9 @@ def test_convert_infix_to_postfix():
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.convert_infix_to_postfix(calculator.tokenization("2a2"))
 
-    assert calculator.convert_infix_to_postfix(calculator.tokenization("2+-")) == [
-        "2",
-        "+",
-        "-",
-    ]
+    with pytest.RaisesExc(errors.ConsecutiveOperatorsError):
+        calculator.convert_infix_to_postfix(calculator.tokenization("2+-"))
+
     assert calculator.convert_infix_to_postfix(calculator.tokenization("5")) == ["5"]
     assert calculator.convert_infix_to_postfix(calculator.tokenization("1+2*3")) == [
         "1",
@@ -171,7 +167,7 @@ def test_execute_expression():
 
     with pytest.RaisesExc(errors.MissingOperandError):
         calculator.execute_expression(convert_to_postfix("10 2"))
-    with pytest.RaisesExc(errors.MissingOperandError):
+    with pytest.RaisesExc(errors.ConsecutiveOperatorsError):
         calculator.execute_expression(convert_to_postfix("10 + + + + 2"))
     with pytest.RaisesExc(errors.InvalidNumberError):
         calculator.execute_expression(["&"])

@@ -48,7 +48,7 @@ def validate(args: argparse.Namespace):
         or (flag_from == "k" and args.value <= 0)
         or (flag_from == "f" and args.value <= -460)
     ):
-        raise errors.TemperaturesBelowAbsoluteZero
+        raise errors.TemperaturesBelowAbsoluteZeroError
 
 
 # ANCHOR[id=convert]

@@ -156,11 +156,11 @@ def test_execute_expression():
     assert calculator.execute_expression(convert_to_postfix("10/2")) == 5.0
     assert calculator.execute_expression(convert_to_postfix("10//2")) == 5.0
     assert calculator.execute_expression(convert_to_postfix("10%2")) == 0.0
-    with pytest.RaisesExc(errors.DivisionByZero):
+    with pytest.RaisesExc(errors.DivisionByZeroError):
         assert calculator.execute_expression(convert_to_postfix("10/0")) == 5.0
-    with pytest.RaisesExc(errors.DivisionByZero):
+    with pytest.RaisesExc(errors.DivisionByZeroError):
         assert calculator.execute_expression(convert_to_postfix("10//0")) == 5.0
-    with pytest.RaisesExc(errors.DivisionByZero):
+    with pytest.RaisesExc(errors.DivisionByZeroError):
         assert calculator.execute_expression(convert_to_postfix("10%0")) == 5.0
 
     assert calculator.execute_expression(convert_to_postfix("(1+2)*3")) == 9.0
@@ -184,3 +184,10 @@ def test_higher_or_equal():
         calculator.higher_or_equal(op1="$", op2="+")
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.higher_or_equal(op1="+", op2="$")
+
+# LINK src/toolkit/calculator.py#higher_or_equal
+def test_validate_parentheses():
+    with pytest.RaisesExc(errors.InvalidParenthesesError):
+        calculator.validate_parentheses("2+2)")
+    with pytest.RaisesExc(errors.InvalidParenthesesError):
+        calculator.validate_parentheses("(2+2)(")

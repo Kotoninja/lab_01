@@ -50,15 +50,15 @@ def test_validate_different_category():
 
 
 def test_temperature_below_zero():
-    with pytest.raises(errors.TemperaturesBelowAbsoluteZero):
+    with pytest.raises(errors.TemperaturesBelowAbsoluteZeroError):
         converter.validate(
             args=argparse.Namespace(value=-1, flag_from="k", flag_to="c")
         )
-    with pytest.raises(errors.TemperaturesBelowAbsoluteZero):
+    with pytest.raises(errors.TemperaturesBelowAbsoluteZeroError):
         converter.validate(
             args=argparse.Namespace(value=-274, flag_from="c", flag_to="c")
         )
-    with pytest.raises(errors.TemperaturesBelowAbsoluteZero):
+    with pytest.raises(errors.TemperaturesBelowAbsoluteZeroError):
         converter.validate(
             args=argparse.Namespace(value=-461, flag_from="f", flag_to="c")
         )

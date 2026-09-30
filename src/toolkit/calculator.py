@@ -18,28 +18,7 @@ def validate(args: argparse.Namespace):
     expression: str = args.expression
     if not len(expression.rstrip()):
         raise errors.EmptyExpressionError
-
-
-# ANCHOR[id=calculate]
-def calculate(args: argparse.Namespace):
-    """Entry point to the calculator, where build all logic
-
-    Args:
-        args (argparse.Namespace): Parsed data
-    """
-    validate(args=args)
-
-    tokens: list[str] = tokenization(args.expression)
-    postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
-    result: Decimal = execute_expression(postfix_list=postfix_convertation)
-
-    sys.stdout.write(str(result))
-
-    if hasattr(args, "command"):
-        data = constans.JSON_RESPONSE(
-            command=args.command, exression=args.expression, answer=float(result)
-        )
-        repository.add(data=data)
+    validate_parentheses(expression=expression)
 
 
 # ANCHOR[id=validate_tokenization]
@@ -63,6 +42,51 @@ def validate_tokenization(infix_list: list[str]):
             raise errors.MissingOperandError
         elif infix_list[i] in operation_list and infix_list[i + 1] in operation_list:
             raise errors.ConsecutiveOperatorsError
+
+# ANCHOR[id=validate_parentheses]
+def validate_parentheses(expression: str):
+    """Check parentheses sequence
+
+    Args:
+        expression (str): exression
+
+    Raises:
+        errors.InvalidParenthesesError: неверная скобочная последовательность
+    """
+    stack: list[str] = []
+
+    for symbol in expression:
+        if symbol == "(":
+            stack.append(symbol)
+        elif symbol == ")":
+            if stack and stack[-1] == "(":
+                stack.pop()
+            else:
+                raise errors.InvalidParenthesesError
+
+    if stack:
+        raise errors.InvalidParenthesesError
+
+
+# ANCHOR[id=calculate]
+def calculate(args: argparse.Namespace):
+    """Entry point to the calculator, where build all logic
+
+    Args:
+        args (argparse.Namespace): Parsed data
+    """
+    validate(args=args)
+    tokens: list[str] = tokenization(args.expression)
+    postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
+    result: Decimal = execute_expression(postfix_list=postfix_convertation)
+
+    sys.stdout.write(str(result))
+
+    if hasattr(args, "command"):
+        data = constans.JSON_RESPONSE(
+            command=args.command, exression=args.expression, answer=float(result)
+        )
+        repository.add(data=data)
 
 
 # ANCHOR[id=tokenization]
@@ -212,15 +236,15 @@ def use_operation(op1: Decimal, op2: Decimal, operation: str) -> Decimal:
             return op1 * op2
         case "/":
             if op2 == 0:
-                raise errors.DivisionByZero
+                raise errors.DivisionByZeroError
             return op1 / op2
         case "//":
             if op2 == 0:
-                raise errors.DivisionByZero
+                raise errors.DivisionByZeroError
             return op1 // op2
         case "%":
             if op2 == 0:
-                raise errors.DivisionByZero
+                raise errors.DivisionByZeroError
             return op1 % op2
         case _:
             raise errors.InvalidCharacterError(operation)

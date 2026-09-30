@@ -1,9 +1,7 @@
 # Шаблон репозитория, для успешной сдачи лабораторных работ.
 
 ## Введение
-Данный шаблон является примером оформления кода для сдачи лабораторных работ.
-Рекомендуется  строго его придерживаться во избежания проблем при сдаче и понижения баллов
-
+Python-пакет `toolkit` с CLI, содержащий **калькулятор** и **конвертер величин**.
 
 ## Структура проекта
 
@@ -11,53 +9,162 @@
     .
     ├── lab<# лабораторной работы>             # Кодовая база вашей лабораторной работы
     │   ├── src/                               # Исходный код
+    │   │   ├── toolkit/
+    │   │   │   ├── сalculator.py              # Калькулятор
+    │   │   │   ├── config.py                  # Загрузка конфига
+    │   │   │   ├── constans.py                # Константные данные
+    │   │   │   ├── converter.py               # Конвертер
+    │   │   │   ├── errors.py                  # Ошибки
+    │   │   │   ├── main.py                    # Сборка всей логики
+    │   │   │   ├── repository.py              # Работа с json
+    │   │   ├── config.json                    # Конфиг проекта
     │   ├── tests/                             # Unit тесты
+    │   │   ├── calculator/
+    │   │   │   ├── test_calculator.py         # Тесты калькулятора
+    │   │   │   ├── test_validate.py           # Тесты валидации калькулятора
+    │   │   ├── converter/
+    │   │   │   ├── test_converter.py          # Тесты конвертера
+    │   │   │   ├── test_validate.py           # Тесты валидации конвертера
+    │   │   ├── test_parser.py                 # Проверка работы парсера
     │   ├── uv.lock                            # зависимости вашего проекта
     │   ├── report.pdf                         # Отчет
     │   ├── .gitignore                         # git ignore файл
-    │   ├──.pre-commit-config.yaml             # Средства автоматизации проверки кодстайла
+    │   ├── .pre-commit-config.yaml            # Средства автоматизации проверки кодстайла
+    │   ├── Makefile                           # Вспомогательные команды
+    │   ├── check.sh                           # Проверка всего проекта
+    │   ├── pyproject.toml
     │   ├── README.md                          # Описание вашего проекта, с описанием файлов и с титульником о том,
                                                # что и какая задача
 </pre>
-
-В папке [src](./src) лежат файлы с реализацией задачи заданной в лабораторной работе. Обязательным файлом является файл
-[main.py](./src/main.py) в котором описана точка входа в приложение - функция **main**. Требования к коду:
-- Переменные, функции и модули именуются по [**snake_case**](https://realpython.com/ref/glossary/snake-case/)
-- Константы должны быть вынесены в файл **constants.py** и именовановаться с помощию символов в верхнем регистре
-- Классы должны именоваться в [**PascalCase**](https://habr.com/ru/articles/724556/)
-- Имена сущностей должны быть осмысленные и содержательные
-- Все отступы должны быть консистентны: 1 TAB = 4 spaces
-- Весь функционал должен быть описан в функциях и в классах. Не допускается писать весь в глобальном скоупе или в одной функции
-- К каждой функции должны быть описаны  [**docstring**](https://peps.python.org/pep-0257/) и аннотации к аргументам и выходным параметрам функций.
-
-В качестве референса проще cходу соблюдать [**PEP8**](https://peps.python.org/pep-0008/) и использовать IDE c готовой поддержкой:
-например PyCharm или VSCode c настроенными плагинами.
-В ходе попыток запушить код в репозиторий ваш код будет проходить проверку статическим анализатором [**mypy**](https://mypy-lang.org/)
-а также с встроенным в [**ruff**](https://astral.sh/ruff) на предмет нарушения код стайла. При работе с кодовой базой
-всю работу необходимо выполнять в [виртуальном окружении](https://docs.python.org/3/tutorial/venv.html)
-
-
-В папке [tests](./tests) лежат [unit тесты](https://tproger.ru/articles/testiruem-na-python-unittest-i-pytest-instrukcija-dlja-nachinajushhih) для проверки функциональности программы или ее частей.
-Рекомендуется использовать pytest. Также название тестов должно быть осмысленно и содержать определение проверямой части.
-Базовые соглашения pytest можно посмотреть [здесь](https://www.qabash.com/pytest-default-naming-conventions-guide/).
-Рекомендуется проверять не только успешные кейсы, но и краевые условия и кейсы в которых была допущена ошибка (неудачные кейсы).
-
-В качестве пакетного менджера в данном шаблоне/репозитории используется [uv](https://github.com/astral-sh/uv).
-Можно использовать и [стандартные виртальные окружения](https://docs.python.org/3/library/venv.html). В таком случае необходимо добавить в репозиторий `requirements.txt`.
-Это достигается командой
-```shell
-pip freeze > requirements.txt
+## Запуск
+```bash
+uv run python -m toolkit --help
 ```
-Также разрешается использовать [`poetry`](https://python-poetry.org/)
-## Как работать с репозиторием и шаблонами
-1. Необходимо создать репозиторий из этого шаблона. Посмотреть можно [здесь](https://docs.github.com/ru/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
-2. Склонировать или спуллить его к себе на машину командами `git pull` или `git clone`
-3. Создать виртуальное окружение:
+## Использование
+## Калькулятор
+```bash
+uv run python -m toolkit calc "EXPRESSION"
+```
+### Возможности
+- целые и вещественные числа;
+- бинарные операторы +, -, *, /, //, %;
+- унарные + и - перед числом;
+- скобки;
+### Примеры
+```bash
+$ uv run python -m toolkit calc "2 + 2"
+4
 
-    a. Для uv прописать команду `uv venv`. Затем прописать `.venv/bin/activate` в терминале
+$ uv run python -m toolkit calc "2 + 2 * 2"
+6
 
-    b. Для обычного python `python -m venv <имя директории где будет храниться папка .venv>`. Затем прописать `.venv/bin/activate` в терминале
-4. Установить [`pre-commit`](https://pre-commit.com/). Для этого достаточно ввести команду `pip install pre-commit`
-5. Выполнить команду `pre-commit install`
-6. При запушивании в репозиторий необходимо правильно составлять сообщения коммита. Правила можно прочитать [здесь](https://github.com/RomuloOliveira/commit-messages-guide/blob/master/README_ru-RU.md)
-7. **Внимательно** читайте то, что пишется при попытке коммита, если исправили ошибки нужно заново добавить отредактированные файлы в гит и попробовать коммитнуть
+$ uv run python -m toolkit calc "10 / 4"
+2.5
+
+$ uv run python -m toolkit calc "-5 + 3"
+-2
+
+$ uv run python -m toolkit calc "1 / 0"
+Division by zero.
+$ echo $?
+2
+```
+
+### Дополнительные возможности
+// (целочисленное деление) и % (остаток):
+```bash
+$ uv run python -m toolkit calc "10 // 3"
+3
+
+$ uv run python -m toolkit calc "10 % 3"
+1
+```
+скобки (recursive descent + RPN):
+```bash
+$ uv run python -m toolkit calc "(2 + 2) * 2"
+8
+```
+- вычисления через Decimal с политикой округления по умолчанию (ROUND_HALF_EVEN);
+- история успешных вычислений сохраняется в JSON
+## Конвертер
+```bash
+python -m toolkit convert VALUE --from UNIT --to UNIT
+```
+## Поддерживаемые группы:
+<pre>
+Группа	        Единицы
+Длина	        mm, cm, m, km
+Масса	        g, kg
+Температура	c, f, k
+</pre>
+## Правила
+- регистр единиц не учитывается (M == m);
+- конвертация между разными группами запрещена;
+- температура ниже абсолютного нуля запрещена;
+- результат — float.
+## Примеры
+```bash
+$ uv run python -m toolkit convert 1 --from m --to mm
+1000
+
+$ uv run python -m toolkit convert 1 --from km --to m
+1000
+
+$ uv run python -m toolkit convert 1 --from kg --to g
+1000
+
+$ uv run python -m toolkit convert 1 --from c --to k
+274
+
+$ uv run python -m toolkit convert 1 --from c --to f
+33.8
+```
+## Обработка ошибок
+CLI выводит сообщение в stderr и завершается с кодом 2. Успешная команда — код 0.
+Ошибки
+<pre>
+EmptyExpressionError                  пустое выражение
+InvalidCharacterError                 недопустимый символ
+MissingOperandError                   пропущенный операнд
+ConsecutiveOperatorsError             два бинарных оператора подряд
+InvalidNumberError                    неверное числовое значение
+UnknownUnitError                      неизвестную единицу
+IncompatibleUnitsError                несовместимые единицы
+DivisionByZeroError                   деление на ноль
+TemperaturesBelowAbsoluteZeroError    температура ниже абсолютного нуля
+InvalidParenthesesError               неверная скобочная последовательность
+</pre>
+
+## Слои
+### Калькулятор
+
+    Tokenization — tokenization(expression):
+    разбивает строку на токены, распознаёт отрицательные числа,
+    проверяет недопустимые символы.
+
+    Validation — validate, validate_tokenization, validate_parentheses:
+    проверки на пустое выражение, два подряд идущих числа/оператора,
+    корректность скобочной последовательности.
+
+    Calculation — convert_infix_to_postfix + execute_expression:
+
+        инфикс → постфикс (алгоритм сортировочной станции);
+
+        вычисление постфикса стеком;
+
+        арифметика через Decimal.
+### Конвертер
+
+    validate(args) — валидация единиц и физических ограничений;
+
+    convert_units(value, flag_from, flag_to) — маршрутизация по группам;
+
+    convert_length / convert_weight / convert_temperature — конкретные формулы;
+
+    get_units_of_measurement(unit) — коэффициент из config.json.
+
+## Тесты
+```bash
+uv run make test
+```
+coverage - 97%

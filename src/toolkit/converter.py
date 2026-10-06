@@ -2,7 +2,7 @@ import argparse
 import sys
 from decimal import Decimal
 
-from toolkit import config, constans, errors, repository
+from toolkit import calculator, config, constans, errors, repository
 
 
 # ANCHOR[id=validate]
@@ -19,6 +19,9 @@ def validate(args: argparse.Namespace):
     """
     flag_from: str = str(args.flag_from).lower()
     flag_to: str = str(args.flag_to).lower()
+
+    if not calculator.isnumber(value=args.value):
+        raise errors.InvalidNumberError(args.value)
 
     if (
         flag_from not in constans.LENGTH_ENUM
@@ -44,9 +47,9 @@ def validate(args: argparse.Namespace):
         raise errors.IncompatibleUnitsError(flag_from, flag_to)
 
     if (
-        (flag_from == "c" and args.value <= -273)
-        or (flag_from == "k" and args.value <= 0)
-        or (flag_from == "f" and args.value <= -460)
+        (flag_from == "c" and float(args.value) < -273.15)
+        or (flag_from == "k" and float(args.value) < 0)
+        or (flag_from == "f" and float(args.value) < -459.67)
     ):
         raise errors.TemperaturesBelowAbsoluteZeroError
 
@@ -66,7 +69,7 @@ def convert(args: argparse.Namespace):
 
     result: Decimal = convert_units(value=value, flag_from=flag_from, flag_to=flag_to)
 
-    sys.stdout.write(str(result))
+    sys.stdout.write(f"{result:f}")
 
     if hasattr(args, "command"):
         data = constans.JSON_RESPONSE(
@@ -135,7 +138,8 @@ def convert_length(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """
     if flag_from == flag_to:
         return value
-
+    if value < 0:
+        raise errors.UnknownUnitError(str(value))
     meters: Decimal = Decimal(value * Decimal(get_units_of_measurement(flag_from)))
     return meters / Decimal(get_units_of_measurement(flag_to))
 
@@ -159,7 +163,7 @@ def convert_temperature(value: Decimal, flag_from: str, flag_to: str) -> Decimal
         case "f":
             celsius = (value - 32) / Decimal("1.8")
         case "k":
-            celsius = value - 273
+            celsius = value - Decimal("273.15")
         case _:
             celsius = value
 
@@ -167,7 +171,7 @@ def convert_temperature(value: Decimal, flag_from: str, flag_to: str) -> Decimal
         case "f":
             return (celsius * Decimal("1.8")) + 32
         case "k":
-            return celsius + 273
+            return celsius + Decimal("273.15")
         case _:
             return celsius
 
@@ -186,6 +190,8 @@ def convert_weight(value: Decimal, flag_from: str, flag_to: str) -> Decimal:
     """
     if flag_from == flag_to:
         return value
+    if value < 0:
+        raise errors.UnknownUnitError(str(value))
 
     return (
         value

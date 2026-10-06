@@ -1,6 +1,5 @@
 import argparse
 import sys
-from decimal import getcontext
 
 from toolkit import calculator, config, converter, errors
 
@@ -31,7 +30,7 @@ def create_parser():
         "convert", help="Convert a value from one unit to another"
     )
     convert_parser.add_argument(
-        "value", default="", nargs="?", type=float, help="Value to convert"
+        "value", default="", nargs="?", type=str, help="Value to convert"
     )
     convert_parser.add_argument(
         "--from",
@@ -52,7 +51,7 @@ def main() -> None:
     Entry point to the application
     """
     parser = create_parser()
-    getcontext().prec = 6
+    # getcontext().prec = 6
     config.load_config()
 
     # Parse arguments and select func

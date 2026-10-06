@@ -23,7 +23,7 @@ def test_convert_units():
         == 1000
     )
     assert (
-        converter.convert_units(value=Decimal("1.0"), flag_from="c", flag_to="k") == 274
+        converter.convert_units(value=Decimal("1.0"), flag_from="c", flag_to="k") == Decimal("274.15")
     )
     assert (
         converter.convert_units(value=Decimal("1.0"), flag_from="kg", flag_to="g")
@@ -59,16 +59,16 @@ def test_convert_temperature():
     ) == Decimal("1.0")
     assert converter.convert_units(
         value=Decimal("1.0"), flag_from="k", flag_to="c"
-    ) == Decimal("-272.00")
+    ) == Decimal("-272.15")
     assert converter.convert_units(
         value=Decimal("1.0"), flag_from="c", flag_to="f"
     ) == Decimal("33.8")
     assert converter.convert_units(
         value=Decimal("1.0"), flag_from="c", flag_to="k"
-    ) == Decimal("274.00")
+    ) == Decimal("274.15")
     assert converter.convert_units(
         value=Decimal("1.0"), flag_from="k", flag_to="c"
-    ) == Decimal("-272.00")
+    ) == Decimal("-272.15")
     assert converter.convert_units(
         value=Decimal("32.0"), flag_from="f", flag_to="c"
     ) == Decimal()

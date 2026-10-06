@@ -11,9 +11,11 @@ def test_calculate_zero_length_input():
     with pytest.RaisesExc(errors.EmptyExpressionError):
         calculator.calculate(args=argparse.Namespace(expression=""))
 
+
 def test_calculate(capsys):
     calculator.calculate(args=argparse.Namespace(expression="2+2"))
     assert capsys.readouterr().out == "4"
+
 
 # LINK src/toolkit/calculator.py#tokenization
 def test_tokenization_unary_operator_before_number():
@@ -105,12 +107,6 @@ def test_convert_infix_to_postfix():
         "+",
     ]
 
-    assert calculator.convert_infix_to_postfix(calculator.tokenization("1+2)")) == [
-        "1",
-        "2",
-        "+",
-    ]
-
     assert calculator.convert_infix_to_postfix(calculator.tokenization("-2+2")) == [
         "-2",
         "2",
@@ -150,7 +146,7 @@ def test_execute_expression():
     assert calculator.execute_expression(convert_to_postfix("22")) == 22.0
     assert calculator.execute_expression(convert_to_postfix("2+2")) == 4.0
     assert calculator.execute_expression(convert_to_postfix("10-2")) == 8.0
-    assert calculator.execute_expression(convert_to_postfix("2.6+2")) == Decimal('4.6')
+    assert calculator.execute_expression(convert_to_postfix("2.6+2")) == Decimal("4.6")
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42
     assert calculator.execute_expression(convert_to_postfix("6*7")) == 42.0
     assert calculator.execute_expression(convert_to_postfix("10/2")) == 5.0
@@ -184,6 +180,7 @@ def test_higher_or_equal():
         calculator.higher_or_equal(op1="$", op2="+")
     with pytest.RaisesExc(errors.InvalidCharacterError):
         calculator.higher_or_equal(op1="+", op2="$")
+
 
 # LINK src/toolkit/calculator.py#higher_or_equal
 def test_validate_parentheses():

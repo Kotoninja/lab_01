@@ -81,7 +81,7 @@ def calculate(args: argparse.Namespace):
     postfix_convertation: list[str] = convert_infix_to_postfix(tokens)
     result: Decimal = execute_expression(postfix_list=postfix_convertation)
 
-    sys.stdout.write(str(result))
+    sys.stdout.write(f"{result:f}")
 
     if hasattr(args, "command"):
         data = constans.JSON_RESPONSE(
@@ -176,12 +176,11 @@ def convert_infix_to_postfix(infix_list: list[str]) -> list[str]:
         if isnumber(symbol):
             postfix_list.append(symbol)
         elif symbol == ")":
-            while len(stack):
-                stack_element: str = stack.pop()
-                if stack_element != "(":
-                    postfix_list.append(stack_element)
-                else:
-                    break
+            while len(stack) and stack[-1] != "(":
+                postfix_list.append(stack.pop())
+            stack.pop()
+        elif symbol == "(":
+            stack.append(symbol)
         else:
             while len(stack) and higher_or_equal(stack[-1], symbol):
                 postfix_list.append(stack.pop())
@@ -266,7 +265,6 @@ def execute_expression(postfix_list: list[str]) -> Decimal:
         Decimal: answer
     """
     stack: list[str] = []
-
     for i in range(len(postfix_list)):
         symbol: str = postfix_list[i]
 
